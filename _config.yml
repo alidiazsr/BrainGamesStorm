@@ -1,0 +1,19 @@
+# Brain Games Storm - GitHub Pages Configuration
+
+# Set the base URL for GitHub Pages
+# This will be automatically configured by GitHub
+
+# Index file
+index: index.html
+
+# 404 page
+404: index.html
+
+# Encoding
+encoding: utf-8
+
+# Exclude files from build
+exclude:
+  - README-GITHUB.md
+  - .gitignore
+  - .github/
