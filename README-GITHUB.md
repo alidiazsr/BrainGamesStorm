@@ -1,9 +1,9 @@
 # 🧠⚡ Brain Games Storm
 
-[![GitHub Pages](https://img.shields.io/badge/demo-live-brightgreen)](https://github.com/yourusername/brain-games-storm)
+[![GitHub Pages](https://img.shields.io/badge/demo-live-brightgreen)](https://alidiazsr.github.io/BrainGamesStorm)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/yourusername/brain-games-storm.svg)](https://github.com/yourusername/brain-games-storm/stargazers)
-[![Forks](https://img.shields.io/github/forks/yourusername/brain-games-storm.svg)](https://github.com/yourusername/brain-games-storm/network)
+[![Stars](https://img.shields.io/github/stars/alidiazsr/BrainGamesStorm.svg)](https://github.com/alidiazsr/BrainGamesStorm/stargazers)
+[![Forks](https://img.shields.io/github/forks/alidiazsr/BrainGamesStorm.svg)](https://github.com/alidiazsr/BrainGamesStorm/network)
 
 > **El sistema de cuestionarios interactivos más emocionante y educativo** 🎓  
 > Una alternativa moderna, gratuita y de código abierto a Kahoot con características educativas avanzadas.
@@ -22,7 +22,7 @@
 
 ## 🚀 **Demo en Vivo**
 
-### [🎮 **JUGAR AHORA - DEMO EN VIVO**](https://yourusername.github.io/brain-games-storm)
+### [🎮 **JUGAR AHORA - DEMO EN VIVO**](https://alidiazsr.github.io/BrainGamesStorm)
 
 **Códigos de prueba disponibles:**
 - 📚 **Cuestionario de JavaScript**: Código `JS2024`
@@ -111,10 +111,10 @@ Crea cuestionarios con este formato JSON:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/yourusername/brain-games-storm.git
+git clone https://github.com/alidiazsr/BrainGamesStorm.git
 
 # Navegar al directorio
-cd brain-games-storm
+cd BrainGamesStorm
 
 # Abrir en navegador
 # Solo abre index.html en tu navegador favorito
@@ -131,7 +131,7 @@ cd brain-games-storm
 3. Selecciona **Deploy from a branch** > **main**
 4. ¡Tu Brain Games Storm estará online en minutos!
 
-**URL será**: `https://tu-usuario.github.io/brain-games-storm`
+**URL será**: `https://alidiazsr.github.io/BrainGamesStorm`
 
 ---
 

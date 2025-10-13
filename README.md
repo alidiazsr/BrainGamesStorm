@@ -1,250 +1,253 @@
-# 🧠⚡ Brain Games Storm - Cuestionarios Online Gratuitos
+# 🧠⚡ Brain Games Storm
 
-Un sistema completo de cuestionarios interactivos estilo Kahoot que funciona completamente en el frontend, sin necesidad de servidor backend. Perfecto para educadores que quieren crear cuestionarios dinámicos y compartirlos gratuitamente en GitHub Pages.
+[![GitHub Pages](https://img.shields.io/badge/demo-live-brightgreen)](https://alidiazsr.github.io/BrainGamesStorm)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/alidiazsr/BrainGamesStorm.svg)](https://github.com/alidiazsr/BrainGamesStorm/stargazers)
+[![Forks](https://img.shields.io/github/forks/alidiazsr/BrainGamesStorm.svg)](https://github.com/alidiazsr/BrainGamesStorm/network)
 
-## 🚀 Características
+> **El sistema de cuestionarios interactivos más emocionante y educativo** 🎓  
+> Una alternativa moderna, gratuita y de código abierto a Kahoot con características educativas avanzadas.
 
-- ✨ **Interfaz moderna** estilo Kahoot con colores vibrantes
-- 👨‍🏫 **Panel de administrador** para crear y gestionar cuestionarios
-- 👩‍🎓 **Interface de estudiante** intuitiva y responsive
-- ⏱️ **Temporizador** configurable por pregunta
-- 🏆 **Sistema de puntuación** basado en velocidad y precisión
-- 📊 **Resultados en tiempo real** para el administrador
-- 💾 **Almacenamiento local** sin necesidad de base de datos
-- 📱 **Completamente responsive** para móviles y tablets
-- 🆓 **Totalmente gratuito** y fácil de desplegar
+## 🌟 **¿Por qué Brain Games Storm?**
 
-## 📁 Estructura del Proyecto
+- 🆓 **100% Gratuito** - Sin límites, sin suscripciones
+- 🎨 **Interfaz Moderna** - Diseño atractivo y gamificado  
+- 🎵 **Sistema de Audio** - Sonidos inmersivos personalizables
+- 📱 **Mobile-First** - Optimizado para smartphones
+- 🔒 **Privacidad Total** - Sin tracking, sin datos en servidores
+- ⚡ **Sin Instalación** - Funciona directamente en el navegador
+- 📚 **Enfoque Educativo** - Rankings con explicaciones detalladas
 
-```
-testkahootformat/
-├── index.html              # Página principal
-├── admin.html              # Panel de administrador
-├── student.html            # Interface de estudiante
-├── admin-control.html      # Control de cuestionario en tiempo real
-├── styles.css              # Estilos CSS principales
-├── script.js               # JavaScript común y funciones utilitarias
-├── admin.js                # JavaScript del administrador
-├── student.js              # JavaScript del estudiante
-├── admin-control.js        # JavaScript del control de cuestionario
-└── README.md               # Este archivo
-```
+---
 
-## 🎮 Cómo Usar
+## 🚀 **Demo en Vivo**
 
-### Para Administradores (Profesores)
+### [🎮 **JUGAR AHORA - DEMO EN VIVO**](https://alidiazsr.github.io/BrainGamesStorm)
 
-1. **Crear un Cuestionario:**
-   - Abre `index.html` en tu navegador
-   - Haz clic en "Administrador"
-   - Clic en "Nuevo Cuestionario"
-   - Completa el título, descripción y tiempo por pregunta
-   - Agrega preguntas con 4 opciones máximo
-   - Marca la respuesta correcta para cada pregunta
-   - Guarda el cuestionario
+**Códigos de prueba disponibles:**
+- 📚 **Cuestionario de JavaScript**: Código `JS2024`
+- 🧮 **Matemáticas Básicas**: Código `MATH01`
+- ⚙️ **Introducción a Node.js**: Código `NODE20`
 
-2. **Iniciar una Sesión:**
-   - En el panel de administrador, clic en "Iniciar" junto al cuestionario
-   - Se generará un código de 6 caracteres
-   - Comparte este código con tus estudiantes
-   - Clic en "Iniciar Sesión" para abrir el control en tiempo real
+---
 
-3. **Controlar la Sesión:**
-   - Espera a que se conecten los estudiantes
-   - Clic en "Comenzar Cuestionario" cuando estés listo
-   - Controla el flujo: mostrar resultados y avanzar preguntas
-   - Ve estadísticas en tiempo real de participación
-   - Descarga los resultados al final
+## ✨ **Características Destacadas**
 
-### Para Estudiantes
+### 🎵 **Sistema de Audio Inmersivo**
+- Sonidos personalizables para cada acción del juego
+- Previsualizador integrado para elegir tu estilo preferido
+- Audio contextual que mejora la experiencia de aprendizaje
 
-1. **Unirse a un Cuestionario:**
-   - Abre `index.html` en tu navegador
-   - Ingresa el código de 6 caracteres proporcionado por el profesor
-   - Escribe tu nombre
-   - Clic en "Unirse al Juego"
+### 🎯 **Gamificación Avanzada**
+- 20 avatares únicos para personalización
+- Rankings en tiempo real con podios animados
+- Efectos visuales y feedback inmediato
+- Cronómetros dinámicos con tensión creciente
 
-2. **Participar:**
-   - Espera a que el profesor inicie el cuestionario
-   - Lee cada pregunta cuidadosamente
-   - Selecciona tu respuesta antes de que se acabe el tiempo
-   - Ve tu puntuación en tiempo real
-   - Revisa los resultados finales al terminar
+### 📚 **Enfoque Educativo Revolucionario**
+- **Rankings educativos**: Cada ranking muestra pregunta + respuesta correcta + justificación
+- **Pantalla de resultados compartible** para discusión grupal
+- **Control total del profesor** sobre el flujo del juego
+- **Análisis detallado** de participación
 
-## 🛠️ Instalación y Despliegue
+### 🔧 **Panel de Administración Profesional**
+- **Autenticación segura** con contraseña personalizable
+- **Carga de cuestionarios JSON** con validación automática
+- **Generación de códigos únicos** de 6 dígitos
+- **Control de flujo** pregunta por pregunta
 
-### Opción 1: GitHub Pages (Recomendado)
+---
 
-1. **Fork o Descarga el proyecto**
-2. **Sube los archivos a un repositorio de GitHub**
-3. **Habilita GitHub Pages:**
-   - Ve a Settings → Pages
-   - Selecciona "Deploy from a branch"
-   - Elige "main" branch / "root"
-   - Tu sitio estará disponible en: `https://tu-usuario.github.io/nombre-repositorio`
+## 🎮 **Cómo Usar**
 
-### Opción 2: Servidor Local
+### 👩‍🏫 **Para Profesores**
 
-1. **Descarga todos los archivos**
-2. **Abre `index.html` directamente en tu navegador**
-   - O usa un servidor local simple:
-   ```bash
-   # Con Python
-   python -m http.server 8000
-   
-   # Con Node.js
-   npx http-server
-   
-   # Con PHP
-   php -S localhost:8000
-   ```
+1. **📁 Acceso Admin**: Clic en "Admin" (esquina superior derecha)
+2. **🔑 Login**: Contraseña por defecto `admin2024`
+3. **📤 Cargar Quiz**: Subir archivo JSON con preguntas
+4. **🎲 Generar Código**: Crear código único de 6 dígitos
+5. **🎮 Controlar Juego**: Avanzar preguntas y mostrar resultados
 
-### Opción 3: Otros Servicios Gratuitos
+### 🎓 **Para Estudiantes**
 
-- **Netlify**: Arrastra la carpeta a netlify.com
-- **Vercel**: Conecta tu repositorio de GitHub
-- **Firebase Hosting**: Sigue la guía de Firebase
+1. **🌐 Acceder**: Ir a la página principal
+2. **🔢 Código**: Introducir código de 6 dígitos
+3. **😊 Avatar**: Elegir entre 20 avatares divertidos
+4. **🏆 Jugar**: Responder y competir en tiempo real
 
-## ⚙️ Configuración
+---
 
-### Personalización de Colores
+## 📋 **Formato de Cuestionarios**
 
-Edita las variables CSS en `styles.css`:
+Crea cuestionarios con este formato JSON:
 
-```css
-:root {
-    --primary-purple: #663399;    /* Color principal */
-    --primary-blue: #0099CC;      /* Color secundario */
-    --success-green: #26D0CE;     /* Color de éxito */
-    --warning-orange: #FF6B35;    /* Color de advertencia */
-    --danger-red: #E21B3C;        /* Color de error */
-    --kahoot-yellow: #FFD23F;     /* Color de acento */
+```json
+{
+  "name": "Mi Cuestionario Increíble",
+  "timePerQuestion": 20,
+  "questions": [
+    {
+      "question": "¿Cuál es la capital de España?",
+      "answers": [
+        { "text": "Barcelona", "correct": false },
+        { "text": "Madrid", "correct": true },
+        { "text": "Valencia", "correct": false },
+        { "text": "Sevilla", "correct": false }
+      ],
+      "justification": "Madrid es la capital de España desde 1561, cuando Felipe II estableció allí la corte de manera permanente."
+    }
+  ]
 }
 ```
 
-### Límites y Configuraciones
+### 📝 **Ejemplos Incluidos**
+- `ejemplo-javascript.json` - Conceptos básicos de JavaScript
+- `ejemplo-matematicas.json` - Operaciones y geometría
+- `nodejs-introduccion.json` - Fundamentos de Node.js
 
-- **Máximo de opciones por pregunta**: 4 (A, B, C, D)
-- **Tiempo mínimo por pregunta**: 10 segundos
-- **Tiempo máximo por pregunta**: 300 segundos (5 minutos)
-- **Longitud del código de juego**: 6 caracteres
-- **Límite de nombre de jugador**: 20 caracteres
+---
 
-## 🔧 Funcionalidades Técnicas
+## 🛠️ **Instalación Local**
 
-### Almacenamiento de Datos
+```bash
+# Clonar el repositorio
+git clone https://github.com/alidiazsr/BrainGamesStorm.git
 
-- **LocalStorage**: Guarda cuestionarios y juegos activos
-- **SessionStorage**: Datos temporales de sesión
-- **No requiere base de datos** externa
+# Navegar al directorio
+cd BrainGamesStorm
 
-### Comunicación en Tiempo Real
+# Abrir en navegador
+# Solo abre index.html en tu navegador favorito
+```
 
-- **Storage Events**: Para comunicación entre ventanas
-- **Custom Events**: Para actualizaciones internas
-- **Polling**: Actualización cada 2 segundos en el control
+**¡No necesita servidor! Funciona directamente desde archivos locales.**
 
-### Sistema de Puntuación
+---
 
+## 🌐 **Despliegue en GitHub Pages**
+
+1. **Fork** este repositorio
+2. Ve a **Settings** > **Pages**
+3. Selecciona **Deploy from a branch** > **main**
+4. ¡Tu Brain Games Storm estará online en minutos!
+
+**URL será**: `https://alidiazsr.github.io/BrainGamesStorm`
+
+---
+
+## 🎨 **Personalización**
+
+### 🎵 **Configurar Sonidos**
+1. Abrir `sound-preview.html`
+2. Escuchar todas las opciones disponibles
+3. Seleccionar favoritos por categoría
+4. Aplicar cambios al sistema
+
+### 🎯 **Modificar Estilos**
+- **Colores**: Editar variables CSS en `styles.css`
+- **Tipografía**: Cambiar fuentes en el `<head>` de HTML
+- **Animaciones**: Ajustar duraciones en las clases CSS
+
+### 🔒 **Cambiar Contraseña Admin**
+Editar en `admin-auth.js`:
 ```javascript
-// Puntuación base + bonus por velocidad
-const baseScore = 1000;
-const timeBonus = (timeRemaining / totalTime) * 500;
-const finalScore = baseScore + timeBonus;
+const ADMIN_PASSWORD = 'tu-nueva-contraseña';
 ```
 
-## 🎨 Personalización
+---
 
-### Agregar Nuevos Tipos de Pregunta
+## 🤝 **Cómo Contribuir**
 
-1. Modifica la estructura de pregunta en `script.js`
-2. Actualiza la interfaz de creación en `admin.html`
-3. Ajusta la visualización en `student.html`
+¡Contribuciones son bienvenidas! 
 
-### Cambiar el Sistema de Puntuación
+### 🐛 **Reportar Bugs**
+- Usa [GitHub Issues](https://github.com/yourusername/brain-games-storm/issues)
+- Incluye pasos para reproducir el problema
+- Especifica navegador y dispositivo
 
-Edita la función `calculateScore()` en `script.js`:
+### ✨ **Solicitar Características**
+- Abre un [Feature Request](https://github.com/yourusername/brain-games-storm/issues)
+- Describe el uso caso y beneficios
+- Incluye mockups si es posible
 
-```javascript
-function calculateScore(timeRemaining, totalTime) {
-    // Tu lógica personalizada aquí
-    return puntuacion;
-}
-```
-
-### Agregar Animaciones
-
-Usa las clases CSS incluidas:
-
-```css
-.slideInUp { animation: slideInUp 0.6s ease; }
-.fadeIn { animation: fadeIn 0.3s ease; }
-.pulse { animation: pulse 1s infinite; }
-```
-
-## 🐛 Solución de Problemas
-
-### Problema: Los estudiantes no pueden unirse
-- Verifica que el código sea correcto (6 caracteres)
-- Confirma que el juego esté activo
-- Revisa que ambos estén en la misma URL
-
-### Problema: No se guardan los cuestionarios
-- Verifica que localStorage esté habilitado
-- Limpia la caché del navegador
-- Asegúrate de no estar en modo incógnito
-
-### Problema: La comunicación en tiempo real no funciona
-- Ambas ventanas deben estar en el mismo dominio
-- LocalStorage debe estar disponible
-- Verifica la consola del navegador para errores
-
-## 📱 Compatibilidad
-
-- ✅ Chrome 80+
-- ✅ Firefox 75+
-- ✅ Safari 13+
-- ✅ Edge 80+
-- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
-
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT. Puedes usarlo, modificarlo y distribuirlo libremente.
-
-## 🤝 Contribuir
-
+### 📝 **Pull Requests**
 1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+2. Crea una rama para tu característica (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## ⭐ Características Avanzadas
+---
 
-### Exportar Resultados
-Los administradores pueden descargar los resultados en formato CSV con:
-- Nombre del estudiante
-- Puntuación total
-- Respuestas correctas/incorrectas
-- Porcentaje de precisión
+## 📁 **Estructura del Proyecto**
 
-### Cuestionarios de Ejemplo
-El sistema incluye automáticamente un cuestionario de ejemplo de "Conocimientos Generales" para empezar rápidamente.
-
-### Responsive Design
-Optimizado para todos los tamaños de pantalla:
-- Desktop: Experiencia completa
-- Tablet: Interface adaptada
-- Mobile: Optimizado para toques
-
-## 📞 Soporte
-
-Si encuentras algún problema o tienes sugerencias:
-
-1. Revisa la sección de solución de problemas
-2. Abre un issue en GitHub
-3. Verifica la consola del navegador para errores específicos
+```
+brain-games-storm/
+├── 📄 index.html              # Página principal
+├── 👨‍💼 admin.html              # Panel de administración
+├── 🎓 student.html            # Interfaz de estudiante
+├── 📊 results-display.html    # Pantalla de resultados
+├── 🎵 sound-preview.html      # Configurador de sonidos
+├── 🎨 styles.css              # Estilos completos
+├── ⚙️ admin.js               # Lógica de administración
+├── 🎮 student.js             # Lógica de estudiante
+├── 📋 *.json                 # Cuestionarios de ejemplo
+└── 📚 README.md              # Esta documentación
+```
 
 ---
 
-**¡Disfruta creando cuestionarios interactivos con KahootFormat!** 🎉
+## 🔧 **Tecnologías**
+
+- **Frontend**: HTML5, CSS3, Vanilla JavaScript
+- **Audio**: Web Audio API
+- **Storage**: LocalStorage
+- **Icons**: FontAwesome
+- **Fonts**: Google Fonts (Montserrat)
+- **Responsive**: CSS Flexbox/Grid
+
+---
+
+## 📜 **Licencia**
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+
+---
+
+## 💫 **Créditos**
+
+Desarrollado con ❤️ para revolucionar la educación interactiva.
+
+**¿Te gusta el proyecto? ¡Dale una ⭐ en GitHub!**
+
+---
+
+## 📞 **Soporte**
+
+- 🐛 **Bugs**: [GitHub Issues](https://github.com/yourusername/brain-games-storm/issues)
+- 💬 **Discusiones**: [GitHub Discussions](https://github.com/yourusername/brain-games-storm/discussions)
+- 📧 **Email**: brain-games-storm@example.com
+
+---
+
+## 🚀 **Roadmap**
+
+- [ ] 📱 App móvil nativa
+- [ ] 🌐 Modo multijugador global
+- [ ] 📈 Analytics avanzados
+- [ ] 🎨 Temas personalizables
+- [ ] 🔊 Síntesis de voz para preguntas
+- [ ] 📊 Exportar resultados a Excel
+- [ ] 🌍 Internacionalización (i18n)
+
+---
+
+<div align="center">
+
+**⚡ Brain Games Storm 2025**  
+*"Aprender nunca fue tan divertido"*
+
+[![GitHub](https://img.shields.io/badge/GitHub-⭐_Star-yellow)](https://github.com/yourusername/brain-games-storm)
+[![Demo](https://img.shields.io/badge/Demo-🎮_Jugar-brightgreen)](https://yourusername.github.io/brain-games-storm)
+
+</div>
