@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previsualizador de Sonidos - Brain Games Storm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header h1 i {
+            color: #667eea;
+        }
+        
+        .sound-category {
+            margin-bottom: 40px;
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sound-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .sound-option {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .sound-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .sound-option.selected {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+        
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .option-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.2rem;
+        }
+        
+        .play-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .play-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .play-button:active {
+            transform: scale(0.95);
+        }
+        
+        .option-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .option-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .select-button {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .select-button:hover {
+            background: #16a34a;
+        }
+        
+        .select-button.selected {
+            background: #dc2626;
+        }
+        
+        .final-selection {
+            background: #22c55e;
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .apply-button {
+            background: white;
+            color: #22c55e;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .apply-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .current-selection {
+            background: #e0f2fe;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #0277bd;
+        }
+        
+        .instruction {
+            background: #fef3c7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        @media (max-width: 768px) {
+            .sound-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-headphones"></i>
+                Previsualizador de Sonidos
+            </h1>
+            <p>Escucha todas las opciones y selecciona tus favoritas</p>
+        </div>
+        
+        <div class="instruction">
+            <i class="fas fa-info-circle"></i>
+            <strong>Instrucciones:</strong> Haz clic en el botón ▶️ para escuchar cada sonido, luego haz clic en "Seleccionar" en los que más te gusten. Al final podrás aplicar todos los cambios.
+        </div>
+        
+        <!-- Sonido de Unirse al Juego -->
+        <div class="sound-category">
+            <div class="category-title">
+                <i class="fas fa-sign-in-alt"></i>
+                1. Sonido de Unirse al Juego
+            </div>
+            <div class="sound-options">
+                <div class="sound-option" data-category="welcome" data-option="A">
+                    <div class="option-header">
+                        <span class="option-name">A - Campanas de Bienvenida</span>
+                        <button class="play-button" onclick="playSound('welcome', 'A')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🔔 Arpegio suave con campanas cálidas que dan la bienvenida
+                    </div>
+                    <div class="option-details">
+                        <span>🎼 Do-Mi-Sol-Do</span>
+                        <span>⏱️ 1.5s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('welcome', 'A')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="welcome" data-option="B">
+                    <div class="option-header">
+                        <span class="option-name">B - Melodía Alegre</span>
+                        <button class="play-button" onclick="playSound('welcome', 'B')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🎵 Secuencia musical ascendente como piano suave
+                    </div>
+                    <div class="option-details">
+                        <span>🎹 Do-Re-Mi-Fa-Sol</span>
+                        <span>⏱️ 2s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('welcome', 'B')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="welcome" data-option="C">
+                    <div class="option-header">
+                        <span class="option-name">C - Arpa Mágica</span>
+                        <button class="play-button" onclick="playSound('welcome', 'C')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        ✨ Glissando de arpa con efecto mágico y envolvente
+                    </div>
+                    <div class="option-details">
+                        <span>🎎 Arpa glissando</span>
+                        <span>⏱️ 1.8s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('welcome', 'C')">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sonido de Respuesta Correcta -->
+        <div class="sound-category">
+            <div class="category-title">
+                <i class="fas fa-check-circle"></i>
+                2. Sonido de Respuesta Correcta
+            </div>
+            <div class="sound-options">
+                <div class="sound-option" data-category="correct" data-option="A">
+                    <div class="option-header">
+                        <span class="option-name">A - Coro de Ángeles</span>
+                        <button class="play-button" onclick="playSound('correct', 'A')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        👼 Acorde mayor con armónicos celestiales
+                    </div>
+                    <div class="option-details">
+                        <span>🎶 Efecto coro</span>
+                        <span>⏱️ 1.5s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('correct', 'A')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="correct" data-option="B">
+                    <div class="option-header">
+                        <span class="option-name">B - Campanitas de Victoria</span>
+                        <button class="play-button" onclick="playSound('correct', 'B')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🔔 Secuencia de campanitas cristalinas brillantes
+                    </div>
+                    <div class="option-details">
+                        <span>✨ Cristalino</span>
+                        <span>⏱️ 1.2s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('correct', 'B')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="correct" data-option="C">
+                    <div class="option-header">
+                        <span class="option-name">C - Melodía de Logro</span>
+                        <button class="play-button" onclick="playSound('correct', 'C')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🏆 Fanfarria corta pero elegante de triunfo
+                    </div>
+                    <div class="option-details">
+                        <span>🎺 Triunfal</span>
+                        <span>⏱️ 1.3s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('correct', 'C')">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sonido de Respuesta Incorrecta -->
+        <div class="sound-category">
+            <div class="category-title">
+                <i class="fas fa-times-circle"></i>
+                3. Sonido de Respuesta Incorrecta
+            </div>
+            <div class="sound-options">
+                <div class="sound-option" data-category="incorrect" data-option="A">
+                    <div class="option-header">
+                        <span class="option-name">A - Suspiro Suave</span>
+                        <button class="play-button" onclick="playSound('incorrect', 'A')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        😔 Tono descendente muy suave, comprensivo
+                    </div>
+                    <div class="option-details">
+                        <span>💨 "Ohh" suave</span>
+                        <span>⏱️ 1s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('incorrect', 'A')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="incorrect" data-option="B">
+                    <div class="option-header">
+                        <span class="option-name">B - Notita Descendente</span>
+                        <button class="play-button" onclick="playSound('incorrect', 'B')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        📉 Dos notas que bajan suavemente, melancólico
+                    </div>
+                    <div class="option-details">
+                        <span>🎵 Descendente</span>
+                        <span>⏱️ 0.8s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('incorrect', 'B')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="incorrect" data-option="C">
+                    <div class="option-header">
+                        <span class="option-name">C - Campanita Suave</span>
+                        <button class="play-button" onclick="playSound('incorrect', 'C')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🔕 Una campanita solitaria, comprensiva
+                    </div>
+                    <div class="option-details">
+                        <span>💙 Comprensivo</span>
+                        <span>⏱️ 0.7s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('incorrect', 'C')">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sonido de Suspenso -->
+        <div class="sound-category">
+            <div class="category-title">
+                <i class="fas fa-hourglass-half"></i>
+                4. Sonido de Suspenso (antes del ranking)
+            </div>
+            <div class="sound-options">
+                <div class="sound-option" data-category="suspense" data-option="A">
+                    <div class="option-header">
+                        <span class="option-name">A - Tambores Suaves</span>
+                        <button class="play-button" onclick="playSound('suspense', 'A')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🥁 Redoble de tambor suave con crescendo gradual
+                    </div>
+                    <div class="option-details">
+                        <span>📈 Crescendo</span>
+                        <span>⏱️ 2s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('suspense', 'A')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="suspense" data-option="B">
+                    <div class="option-header">
+                        <span class="option-name">B - Misterio Mágico</span>
+                        <button class="play-button" onclick="playSound('suspense', 'B')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🔮 Notas espaciadas con reverb para expectativa mágica
+                    </div>
+                    <div class="option-details">
+                        <span>✨ Mágico</span>
+                        <span>⏱️ 2.5s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('suspense', 'B')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="suspense" data-option="C">
+                    <div class="option-header">
+                        <span class="option-name">C - Cuerdas Dramáticas</span>
+                        <button class="play-button" onclick="playSound('suspense', 'C')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🎻 Acorde sostenido estilo cinematográfico suave
+                    </div>
+                    <div class="option-details">
+                        <span>🎬 Cinematográfico</span>
+                        <span>⏱️ 2.2s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('suspense', 'C')">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sonido de Victoria Final -->
+        <div class="sound-category">
+            <div class="category-title">
+                <i class="fas fa-trophy"></i>
+                5. Sonido de Victoria Final
+            </div>
+            <div class="sound-options">
+                <div class="sound-option" data-category="victory" data-option="A">
+                    <div class="option-header">
+                        <span class="option-name">A - Fanfarria Real</span>
+                        <button class="play-button" onclick="playSound('victory', 'A')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        👑 Melodía de coronación elegante y majestuosa
+                    </div>
+                    <div class="option-details">
+                        <span>🎺 Majestuosa</span>
+                        <span>⏱️ 4s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('victory', 'A')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="victory" data-option="B">
+                    <div class="option-header">
+                        <span class="option-name">B - Coro de Celebración</span>
+                        <button class="play-button" onclick="playSound('victory', 'B')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🎉 Voces celestiales que celebran el logro
+                    </div>
+                    <div class="option-details">
+                        <span>😇 Celestial</span>
+                        <span>⏱️ 3.5s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('victory', 'B')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="victory" data-option="C">
+                    <div class="option-header">
+                        <span class="option-name">C - Campanas de Catedral</span>
+                        <button class="play-button" onclick="playSound('victory', 'C')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        ⛪ Repique majestuoso de gran celebración
+                    </div>
+                    <div class="option-details">
+                        <span>🔔 Catedral</span>
+                        <span>⏱️ 4.5s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('victory', 'C')">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sonido de Tick -->
+        <div class="sound-category">
+            <div class="category-title">
+                <i class="fas fa-clock"></i>
+                6. Sonido de Tick/Timer
+            </div>
+            <div class="sound-options">
+                <div class="sound-option" data-category="tick" data-option="A">
+                    <div class="option-header">
+                        <span class="option-name">A - Gotas de Agua</span>
+                        <button class="play-button" onclick="playSound('tick', 'A')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        💧 Sonido suave de gota que cae, relajante
+                    </div>
+                    <div class="option-details">
+                        <span>🌊 Relajante</span>
+                        <span>⏱️ 0.3s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('tick', 'A')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="tick" data-option="B">
+                    <div class="option-header">
+                        <span class="option-name">B - Campanita Sutil</span>
+                        <button class="play-button" onclick="playSound('tick', 'B')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        🔔 Ting muy suave y cristalino, elegante
+                    </div>
+                    <div class="option-details">
+                        <span>✨ Elegante</span>
+                        <span>⏱️ 0.2s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('tick', 'B')">Seleccionar</button>
+                </div>
+                
+                <div class="sound-option" data-category="tick" data-option="C">
+                    <div class="option-header">
+                        <span class="option-name">C - Chasquido Suave</span>
+                        <button class="play-button" onclick="playSound('tick', 'C')">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="option-description">
+                        👆 Como chasquear dedos suavemente, orgánico
+                    </div>
+                    <div class="option-details">
+                        <span>🎵 Rítmico</span>
+                        <span>⏱️ 0.2s</span>
+                    </div>
+                    <button class="select-button" onclick="selectOption('tick', 'C')">Seleccionar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Selección Final -->
+        <div class="final-selection">
+            <h2><i class="fas fa-magic"></i> Tu Selección Actual</h2>
+            <div class="current-selection" id="currentSelection">
+                Aún no has seleccionado ningún sonido. Haz clic en "Seleccionar" en las opciones que más te gusten.
+            </div>
+            <button class="apply-button" onclick="applyChanges()" id="applyButton" disabled>
+                <i class="fas fa-download"></i>
+                Aplicar Sonidos Seleccionados
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de sonidos
+        let audioContext;
+        let selectedSounds = {};
+        
+        // Inicializar Audio Context
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        // Crear oscilador
+        function createOscillator(frequency, type = 'sine') {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = type;
+            
+            return { oscillator, gainNode };
+        }
+        
+        // Definiciones de sonidos
+        const soundDefinitions = {
+            welcome: {
+                A: () => playBellsWelcome(),
+                B: () => playHappyMelody(),
+                C: () => playMagicHarp()
+            },
+            correct: {
+                A: () => playAngelChoir(),
+                B: () => playVictoryBells(),
+                C: () => playAchievementMelody()
+            },
+            incorrect: {
+                A: () => playSoftSigh(),
+                B: () => playDescendingNotes(),
+                C: () => playSoftBell()
+            },
+            suspense: {
+                A: () => playSoftDrums(),
+                B: () => playMagicMystery(),
+                C: () => playDramaticStrings()
+            },
+            victory: {
+                A: () => playRoyalFanfare(),
+                B: () => playCelebrationChoir(),
+                C: () => playCathedralBells()
+            },
+            tick: {
+                A: () => playWaterDrop(),
+                B: () => playSubtleBell(),
+                C: () => playSoftSnap()
+            }
+        };
+        
+        // Implementaciones de sonidos
+        function playBellsWelcome() {
+            const notes = [523.25, 659.25, 783.99, 1046.5]; // C-E-G-C
+            notes.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime + index * 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.3 + 0.6);
+                oscillator.start(audioContext.currentTime + index * 0.3);
+                oscillator.stop(audioContext.currentTime + index * 0.3 + 0.6);
+            });
+        }
+        
+        function playHappyMelody() {
+            const notes = [523.25, 587.33, 659.25, 698.46, 783.99]; // C-D-E-F-G
+            notes.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'triangle');
+                gainNode.gain.setValueAtTime(0.12, audioContext.currentTime + index * 0.25);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.25 + 0.5);
+                oscillator.start(audioContext.currentTime + index * 0.25);
+                oscillator.stop(audioContext.currentTime + index * 0.25 + 0.5);
+            });
+        }
+        
+        function playMagicHarp() {
+            for (let i = 0; i < 12; i++) {
+                const freq = 261.63 * Math.pow(2, i/12 * 2); // Glissando
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                gainNode.gain.setValueAtTime(0.08, audioContext.currentTime + i * 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.05 + 0.4);
+                oscillator.start(audioContext.currentTime + i * 0.05);
+                oscillator.stop(audioContext.currentTime + i * 0.05 + 0.4);
+            }
+        }
+        
+        function playAngelChoir() {
+            const chord = [523.25, 659.25, 783.99, 1046.5]; // C major chord
+            chord.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 1.5);
+            });
+        }
+        
+        function playVictoryBells() {
+            const notes = [1046.5, 1318.5, 1568]; // High bells
+            notes.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime + index * 0.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.2 + 0.8);
+                oscillator.start(audioContext.currentTime + index * 0.2);
+                oscillator.stop(audioContext.currentTime + index * 0.2 + 0.8);
+            });
+        }
+        
+        function playAchievementMelody() {
+            const notes = [523.25, 659.25, 783.99, 1046.5]; // Fanfare
+            notes.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'triangle');
+                gainNode.gain.setValueAtTime(0.18, audioContext.currentTime + index * 0.15);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.15 + 0.4);
+                oscillator.start(audioContext.currentTime + index * 0.15);
+                oscillator.stop(audioContext.currentTime + index * 0.15 + 0.4);
+            });
+        }
+        
+        function playSoftSigh() {
+            const { oscillator, gainNode } = createOscillator(400, 'sine');
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 1);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 1);
+        }
+        
+        function playDescendingNotes() {
+            const notes = [440, 349.23]; // A4 to F4
+            notes.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime + index * 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.3 + 0.5);
+                oscillator.start(audioContext.currentTime + index * 0.3);
+                oscillator.stop(audioContext.currentTime + index * 0.3 + 0.5);
+            });
+        }
+        
+        function playSoftBell() {
+            const { oscillator, gainNode } = createOscillator(800, 'sine');
+            gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.7);
+        }
+        
+        function playSoftDrums() {
+            for (let i = 0; i < 8; i++) {
+                const { oscillator, gainNode } = createOscillator(80 + i * 5, 'sawtooth');
+                gainNode.gain.setValueAtTime(0.05 + i * 0.015, audioContext.currentTime + i * 0.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.2 + 0.3);
+                oscillator.start(audioContext.currentTime + i * 0.2);
+                oscillator.stop(audioContext.currentTime + i * 0.2 + 0.3);
+            }
+        }
+        
+        function playMagicMystery() {
+            const notes = [440, 523.25, 659.25];
+            notes.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                
+                // Añadir reverb simulado
+                const delay = audioContext.createDelay();
+                delay.delayTime.value = 0.3;
+                const feedback = audioContext.createGain();
+                feedback.gain.value = 0.3;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(delay);
+                delay.connect(feedback);
+                feedback.connect(delay);
+                delay.connect(audioContext.destination);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime + index * 0.8);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.8 + 1);
+                oscillator.start(audioContext.currentTime + index * 0.8);
+                oscillator.stop(audioContext.currentTime + index * 0.8 + 1);
+            });
+        }
+        
+        function playDramaticStrings() {
+            const chord = [220, 277.18, 329.63]; // A3 chord
+            chord.forEach(freq => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sawtooth');
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.15, audioContext.currentTime + 2.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2.2);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 2.2);
+            });
+        }
+        
+        function playRoyalFanfare() {
+            const melody = [
+                { freq: 523.25, time: 0, duration: 0.5 },
+                { freq: 659.25, time: 0.3, duration: 0.5 },
+                { freq: 783.99, time: 0.6, duration: 0.5 },
+                { freq: 1046.5, time: 0.9, duration: 0.8 },
+                { freq: 783.99, time: 1.5, duration: 0.5 },
+                { freq: 1046.5, time: 2, duration: 1 }
+            ];
+            
+            melody.forEach(note => {
+                const { oscillator, gainNode } = createOscillator(note.freq, 'triangle');
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + note.time);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + note.time + note.duration);
+                oscillator.start(audioContext.currentTime + note.time);
+                oscillator.stop(audioContext.currentTime + note.time + note.duration);
+            });
+        }
+        
+        function playCelebrationChoir() {
+            // Simular voces con múltiples osciladores
+            const harmonies = [523.25, 659.25, 783.99, 1046.5];
+            harmonies.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime + index * 0.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3.5);
+                oscillator.start(audioContext.currentTime + index * 0.2);
+                oscillator.stop(audioContext.currentTime + 3.5);
+            });
+        }
+        
+        function playCathedralBells() {
+            const bells = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+            bells.forEach((freq, index) => {
+                const { oscillator, gainNode } = createOscillator(freq, 'sine');
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime + index * 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.3 + 2);
+                oscillator.start(audioContext.currentTime + index * 0.3);
+                oscillator.stop(audioContext.currentTime + index * 0.3 + 2);
+            });
+        }
+        
+        function playWaterDrop() {
+            const { oscillator, gainNode } = createOscillator(1000, 'sine');
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.3);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+        
+        function playSubtleBell() {
+            const { oscillator, gainNode } = createOscillator(2000, 'sine');
+            gainNode.gain.setValueAtTime(0.06, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+        
+        function playSoftSnap() {
+            const { oscillator, gainNode } = createOscillator(300, 'square');
+            gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+        
+        // Función para reproducir sonidos
+        function playSound(category, option) {
+            initAudioContext();
+            if (soundDefinitions[category] && soundDefinitions[category][option]) {
+                soundDefinitions[category][option]();
+            }
+        }
+        
+        // Función para seleccionar sonidos
+        function selectOption(category, option) {
+            // Limpiar selecciones anteriores de la misma categoría
+            document.querySelectorAll(`[data-category="${category}"]`).forEach(el => {
+                el.classList.remove('selected');
+                el.querySelector('.select-button').textContent = 'Seleccionar';
+                el.querySelector('.select-button').classList.remove('selected');
+            });
+            
+            // Marcar nueva selección
+            const element = document.querySelector(`[data-category="${category}"][data-option="${option}"]`);
+            element.classList.add('selected');
+            element.querySelector('.select-button').textContent = '✓ Seleccionado';
+            element.querySelector('.select-button').classList.add('selected');
+            
+            // Guardar selección
+            selectedSounds[category] = option;
+            
+            // Actualizar display
+            updateSelectionDisplay();
+        }
+        
+        function updateSelectionDisplay() {
+            const categories = {
+                welcome: 'Unirse al Juego',
+                correct: 'Respuesta Correcta',
+                incorrect: 'Respuesta Incorrecta', 
+                suspense: 'Suspenso',
+                victory: 'Victoria Final',
+                tick: 'Tick/Timer'
+            };
+            
+            const selection = document.getElementById('currentSelection');
+            const applyButton = document.getElementById('applyButton');
+            
+            if (Object.keys(selectedSounds).length === 0) {
+                selection.innerHTML = 'Aún no has seleccionado ningún sonido. Haz clic en "Seleccionar" en las opciones que más te gusten.';
+                applyButton.disabled = true;
+            } else {
+                let html = '<strong>Has seleccionado:</strong><br>';
+                Object.entries(selectedSounds).forEach(([category, option]) => {
+                    html += `• ${categories[category]}: Opción ${option}<br>`;
+                });
+                selection.innerHTML = html;
+                applyButton.disabled = false;
+            }
+        }
+        
+        function applyChanges() {
+            if (Object.keys(selectedSounds).length === 0) {
+                alert('Por favor selecciona al menos un sonido.');
+                return;
+            }
+            
+            // Guardar selecciones en localStorage
+            localStorage.setItem('selectedSounds', JSON.stringify(selectedSounds));
+            
+            // Mostrar mensaje de confirmación
+            const message = `¡Sonidos guardados exitosamente!
+
+Selecciones guardadas:
+${Object.entries(selectedSounds).map(([category, option]) => `• ${category}: Opción ${option}`).join('\n')}
+
+¿Quieres que aplique estos sonidos ahora al sistema?`;
+            
+            if (confirm(message)) {
+                // Aquí llamaremos la función para aplicar los cambios
+                window.opener && window.opener.postMessage({
+                    type: 'applySounds',
+                    sounds: selectedSounds
+                }, '*');
+                
+                alert('¡Sonidos aplicados! Puedes cerrar esta ventana y probar los nuevos sonidos en el juego.');
+            }
+        }
+        
+        // Cargar selecciones guardadas
+        window.addEventListener('load', function() {
+            const saved = localStorage.getItem('selectedSounds');
+            if (saved) {
+                try {
+                    selectedSounds = JSON.parse(saved);
+                    // Marcar opciones guardadas
+                    Object.entries(selectedSounds).forEach(([category, option]) => {
+                        selectOption(category, option);
+                    });
+                } catch (e) {
+                    console.error('Error loading saved sounds:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

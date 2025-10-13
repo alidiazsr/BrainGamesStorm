@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - Brain Games Storm</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        
+        .results-header h1 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .results-header h1 i {
+            color: #667eea;
+        }
+        
+        .question-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .correct-answer-banner {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 25px 0;
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .correct-answer-banner i {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        
+        .correct-answer-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .justification-section {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #f59e0b;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        .justification-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #92400e;
+        }
+        
+        .justification-header i {
+            font-size: 1.5rem;
+            margin-right: 12px;
+        }
+        
+        .justification-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+        
+        .justification-text {
+            color: #78350f;
+            font-size: 1.2rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+        
+        .stats-section {
+            margin: 30px 0;
+        }
+        
+        .stats-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #374151;
+            font-size: 1.2rem;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .option-result {
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease;
+            animation: popIn 0.6s ease-out;
+            animation-delay: calc(var(--index, 0) * 0.1s);
+            animation-fill-mode: both;
+        }
+        
+        .option-result:hover {
+            transform: translateY(-5px);
+        }
+        
+        .option-result.correct {
+            border: 4px solid #22c55e;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .option-label {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        
+        .option-text {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .option-stats {
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            padding-top: 15px;
+        }
+        
+        .student-count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .percentage {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .crown-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            animation: bounce 2s infinite;
+        }
+        
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #667eea;
+        }
+        
+        .loading-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: spin 2s linear infinite;
+        }
+        
+        .loading-state h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .results-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .results-header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .correct-answer-banner {
+                padding: 15px;
+            }
+            
+            .correct-answer-banner i {
+                font-size: 1.5rem;
+                margin-right: 10px;
+            }
+            
+            .correct-answer-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <div class="results-header">
+            <h1>
+                <i class="fas fa-chart-bar"></i>
+                Resultados de la Pregunta
+            </h1>
+        </div>
+        
+        <div id="loadingState" class="loading-state">
+            <i class="fas fa-spinner"></i>
+            <h2>Esperando resultados...</h2>
+            <p>La profesora mostrará los resultados en un momento</p>
+        </div>
+        
+        <div id="resultsContent" style="display: none;">
+            <!-- Los resultados se cargarán aquí dinámicamente -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Escuchar mensajes del admin principal
+        let resultsData = null;
+        
+        // Función para recibir datos de la ventana padre
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'showResults') {
+                displayResults(event.data.results);
+            }
+        });
+        
+        // También verificar localStorage para datos compartidos
+        function checkForResults() {
+            const sharedResults = localStorage.getItem('currentQuestionResults');
+            if (sharedResults) {
+                try {
+                    const data = JSON.parse(sharedResults);
+                    displayResults(data);
+                } catch (e) {
+                    console.error('Error parsing results data:', e);
+                }
+            }
+        }
+        
+        function displayResults(data) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('resultsContent').style.display = 'block';
+            
+            const { question, questionIndex, totalQuestions, answerStats, totalAnswered, justification } = data;
+            
+            const optionLabels = ['A', 'B', 'C', 'D'];
+            const optionColors = ['#e53e3e', '#3182ce', '#ecc94b', '#38a169']; // Colores Kahoot
+            const optionTextColors = ['white', 'white', '#2d3748', 'white'];
+            
+            document.getElementById('resultsContent').innerHTML = `
+                <div class="question-title">
+                    Pregunta ${questionIndex + 1} de ${totalQuestions}
+                </div>
+                
+                <h2 style="text-align: center; color: #333; margin: 20px 0; font-size: 1.8rem;">
+                    ${escapeHtml(question.text)}
+                </h2>
+                
+                <div class="correct-answer-banner">
+                    <i class="fas fa-trophy"></i>
+                    <div class="correct-answer-text">
+                        Respuesta Correcta: ${optionLabels[question.correctAnswer]} - ${escapeHtml(question.options[question.correctAnswer])}
+                    </div>
+                </div>
+                
+                ${justification ? `
+                    <div class="justification-section">
+                        <div class="justification-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>Explicación</h3>
+                        </div>
+                        <p class="justification-text">${escapeHtml(justification)}</p>
+                    </div>
+                ` : ''}
+                
+                <div class="stats-section">
+                    <div class="stats-header">
+                        <strong>Respuestas de los Estudiantes (${totalAnswered} participaron)</strong>
+                    </div>
+                    
+                    <div class="options-grid">
+                        ${question.options.map((option, index) => {
+                            if (!option || option.trim() === '') return '';
+                            
+                            const isCorrect = index === question.correctAnswer;
+                            const count = answerStats[index] || 0;
+                            const percentage = totalAnswered > 0 ? Math.round((count / totalAnswered) * 100) : 0;
+                            
+                            return `
+                                <div class="option-result ${isCorrect ? 'correct' : ''}" 
+                                     style="background: ${optionColors[index]}; color: ${optionTextColors[index]}; --index: ${index}">
+                                    ${isCorrect ? '<i class="fas fa-crown crown-icon"></i>' : ''}
+                                    <div class="option-label">${optionLabels[index]}</div>
+                                    <div class="option-text">${escapeHtml(option)}</div>
+                                    <div class="option-stats">
+                                        <div class="student-count">${count} estudiante${count !== 1 ? 's' : ''}</div>
+                                        <div class="percentage">${percentage}%</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).filter(html => html !== '').join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Verificar al cargar la página
+        checkForResults();
+        
+        // Verificar periódicamente por nuevos datos
+        setInterval(checkForResults, 1000);
+    </script>
+</body>
+</html>

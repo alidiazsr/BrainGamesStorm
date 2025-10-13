@@ -1,0 +1,62 @@
+{
+  "name": "Matemáticas Básicas",
+  "description": "Operaciones y conceptos matemáticos fundamentales",
+  "timeLimit": 25,
+  "questions": [
+    {
+      "question": "¿Cuánto es 15 + 27?",
+      "options": [
+        "40",
+        "42",
+        "44", 
+        "45"
+      ],
+      "answer": 1,
+      "justification": "15 + 27 = 42"
+    },
+    {
+      "question": "¿Cuál es la raíz cuadrada de 64?",
+      "options": [
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "answer": 2,
+      "justification": "8 × 8 = 64, por lo tanto √64 = 8"
+    },
+    {
+      "question": "¿Qué significa 'π' (pi)?",
+      "options": [
+        "La relación entre diámetro y circunferencia",
+        "La relación entre circunferencia y diámetro", 
+        "El área de un círculo",
+        "La mitad de un círculo"
+      ],
+      "answer": 1,
+      "justification": "Pi (π) es la relación constante entre la circunferencia y el diámetro de cualquier círculo. Su valor aproximado es 3.14159..."
+    },
+    {
+      "question": "¿Cuál es el resultado de 3² + 4²?",
+      "options": [
+        "12",
+        "25",
+        "49",
+        "14"
+      ],
+      "answer": 1,
+      "justification": "3² = 9 y 4² = 16, entonces 9 + 16 = 25. Este es un ejemplo del teorema de Pitágoras con un triángulo 3-4-5."
+    },
+    {
+      "question": "¿Qué fracción es equivalente a 0.25?",
+      "options": [
+        "1/2",
+        "1/4", 
+        "2/5",
+        "3/8"
+      ],
+      "answer": 1,
+      "justification": "0.25 = 25/100 = 1/4. Para convertir decimales a fracciones, podemos expresar el decimal como fracción con denominador potencia de 10 y luego simplificar."
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "name": "Cuestionario de Introducción a Node.js",
+  "timePerQuestion": 20,
+  "questions": [
+    {
+      "question": "¿Qué es una ruta absoluta?",
+      "answers": [
+        { "text": "Es una ruta que depende de la ubicación actual.", "correct": false },
+        { "text": "Una ruta que se utiliza solo en navegadores web.", "correct": false },
+        { "text": "Una ruta que utiliza referencias como ./ o ../.", "correct": false },
+        { "text": "Es la ubicación completa de un archivo desde la raíz del sistema.", "correct": true }
+      ],
+      "justification": "Una ruta absoluta especifica la ubicación completa de un archivo o directorio desde la raíz del sistema de archivos, sin depender de la ubicación actual del usuario. Por ejemplo: C:\\Users\\Usuario\\Desktop\\archivo.txt en Windows o /home/usuario/archivo.txt en Linux."
+    },
+    {
+      "question": "¿Qué editor de texto se utiliza comúnmente en la terminal y Git Bash?",
+      "answers": [
+        { "text": "Vim", "correct": false },
+        { "text": "Nano", "correct": true },
+        { "text": "Emacs", "correct": false },
+        { "text": "Sublime Text", "correct": false }
+      ],
+      "justification": "Nano es un editor de texto simple y fácil de usar que viene preinstalado en la mayoría de sistemas Unix/Linux y está disponible en Git Bash. Es más intuitivo para principiantes que Vim o Emacs, ya que muestra las combinaciones de teclas básicas en la parte inferior de la pantalla."
+    },
+    {
+      "question": "¿Cuál es el motor de JavaScript utilizado por Node.js?",
+      "answers": [
+        { "text": "Chakra", "correct": false },
+        { "text": "SpiderMonkey", "correct": false },
+        { "text": "V8", "correct": true },
+        { "text": "JavaScriptCore", "correct": false }
+      ],
+      "justification": "Node.js utiliza V8, el motor de JavaScript de código abierto desarrollado por Google que también alimenta el navegador Chrome. V8 compila JavaScript directamente a código máquina nativo, lo que proporciona un alto rendimiento."
+    },
+    {
+      "question": "¿Qué sistema de módulos es el más moderno y recomendado?",
+      "answers": [
+        { "text": "CommonJS", "correct": false },
+        { "text": "AMD", "correct": false },
+        { "text": "UMD", "correct": false },
+        { "text": "ECMAScript Modules", "correct": true }
+      ],
+      "justification": "ECMAScript Modules (ESM) es el estándar oficial de módulos de JavaScript definido en la especificación ECMAScript. Es más moderno que CommonJS, permite carga asíncrona, tree-shaking más eficiente, y es compatible tanto en navegadores como en Node.js."
+    },
+    {
+      "question": "¿Qué comando se usa para inicializar un proyecto Node.js y generar el archivo package.json automáticamente?",
+      "answers": [
+        { "text": "npm init -y", "correct": true },
+        { "text": "node init", "correct": false },
+        { "text": "npm install", "correct": false },
+        { "text": "npm start", "correct": false }
+      ],
+      "justification": "El comando 'npm init -y' inicializa un nuevo proyecto Node.js y crea automáticamente un archivo package.json con valores predeterminados. La bandera '-y' (o --yes) acepta automáticamente todas las opciones por defecto sin solicitar confirmación interactiva."
+    },
+    {
+      "question": "¿Cuál de las siguientes opciones describe una dependencia local?",
+      "answers": [
+        { "text": "Se instala globalmente y está disponible para todos los proyectos.", "correct": false },
+        { "text": "Se instala dentro de la carpeta del proyecto y está listada en package.json.", "correct": true },
+        { "text": "No requiere instalación; viene preinstalada con Node.js.", "correct": false },
+        { "text": "Es exclusiva para herramientas CLI.", "correct": false }
+      ],
+      "justification": "Una dependencia local se instala específicamente para un proyecto en su carpeta node_modules y se registra en el archivo package.json. Esto asegura que cada proyecto tenga sus propias versiones de las dependencias, evitando conflictos entre proyectos."
+    },
+    {
+      "question": "¿Qué comando permite instalar paquetes en el proyecto?",
+      "answers": [
+        { "text": "npm run", "correct": false },
+        { "text": "npm init", "correct": false },
+        { "text": "npm install", "correct": true },
+        { "text": "npm update", "correct": false }
+      ],
+      "justification": "El comando 'npm install' (o su forma abreviada 'npm i') se utiliza para instalar paquetes de Node.js. Puede instalar dependencias específicas, todas las dependencias listadas en package.json, o dependencias globales con la bandera -g."
+    },
+    {
+      "question": "¿Qué tipo de módulo es fs en Node.js?",
+      "answers": [
+        { "text": "Módulo externo", "correct": false },
+        { "text": "Módulo propio", "correct": false },
+        { "text": "Módulo compartido", "correct": false },
+        { "text": "Módulo nativo", "correct": true }
+      ],
+      "justification": "El módulo 'fs' (file system) es un módulo nativo o core de Node.js, lo que significa que viene incluido con la instalación de Node.js y no necesita ser instalado por separado. Proporciona una API para interactuar con el sistema de archivos."
+    },
+    {
+      "question": "¿Qué función de JSON convierte un objeto de JavaScript a una cadena en formato JSON?",
+      "answers": [
+        { "text": "JSON.parse()", "correct": false },
+        { "text": "JSON.stringify()", "correct": true },
+        { "text": "JSON.format()", "correct": false },
+        { "text": "JSON.convert()", "correct": false }
+      ],
+      "justification": "JSON.stringify() convierte un objeto de JavaScript en una cadena JSON. Es el método opuesto a JSON.parse(), que convierte una cadena JSON de vuelta a un objeto JavaScript. Esta función es esencial para serializar datos antes de enviarlos por red o almacenarlos."
+    },
+    {
+      "question": "¿Cuál es el principal uso del comando npm update?",
+      "answers": [
+        { "text": "Instalar un paquete específico.", "correct": false },
+        { "text": "Desinstalar un paquete.", "correct": false },
+        { "text": "Ejecutar scripts definidos en package.json.", "correct": false },
+        { "text": "Actualizar paquetes instalados a sus versiones más recientes.", "correct": true }
+      ],
+      "justification": "El comando 'npm update' actualiza todos los paquetes instalados a sus versiones más recientes compatible con los rangos de versión especificados en package.json. Esto ayuda a mantener las dependencias actualizadas con correcciones de seguridad y mejoras."
+    },
+    {
+      "question": "¿Qué tipo de módulos pueden compartir variables y funciones entre sí?",
+      "answers": [
+        { "text": "CommonJS", "correct": false },
+        { "text": "Módulos nativos", "correct": false },
+        { "text": "ECMAScript Modules", "correct": true },
+        { "text": "Módulos externos", "correct": false }
+      ],
+      "justification": "Los ECMAScript Modules (ESM) permiten compartir un contexto entre módulos, lo que significa que pueden compartir variables y funciones de manera más eficiente. Esto contrasta con CommonJS, donde cada módulo tiene su propio contexto aislado y las importaciones son copias."
+    },
+    {
+      "question": "¿Qué archivo asegura que las instalaciones de dependencias sean consistentes en todos los entornos?",
+      "answers": [
+        { "text": "package-lock.json", "correct": true },
+        { "text": "package.json", "correct": false },
+        { "text": "node_modules", "correct": false },
+        { "text": "config.json", "correct": false }
+      ],
+      "justification": "El archivo package-lock.json registra las versiones exactas de todas las dependencias y sus subdependencias instaladas. Esto garantiza que todos los desarrolladores y entornos de producción tengan exactamente las mismas versiones de los paquetes, evitando el problema de 'funciona en mi máquina'."
+    },
+    {
+      "question": "¿Qué comando de NPM permite ejecutar scripts definidos en package.json?",
+      "answers": [
+        { "text": "npm exec", "correct": false },
+        { "text": "npm start", "correct": false },
+        { "text": "npm run", "correct": true },
+        { "text": "npm script", "correct": false }
+      ],
+      "justification": "El comando 'npm run' seguido del nombre del script ejecuta los scripts personalizados definidos en la sección 'scripts' del archivo package.json. Por ejemplo, 'npm run build' ejecutaría el script definido como 'build' en package.json."
+    },
+    {
+      "question": "¿Qué módulo en Node.js permite realizar operaciones con archivos y directorios?",
+      "answers": [
+        { "text": "os", "correct": false },
+        { "text": "fs", "correct": true },
+        { "text": "http", "correct": false },
+        { "text": "path", "correct": false }
+      ],
+      "justification": "El módulo 'fs' (file system) proporciona una API para realizar operaciones con el sistema de archivos, incluyendo leer, escribir, crear, eliminar archivos y directorios. Ofrece tanto métodos síncronos como asíncronos para estas operaciones."
+    },
+    {
+      "question": "¿Cuál es una característica clave de los ECMAScript Modules (ESM)?",
+      "answers": [
+        { "text": "Comparten un contexto entre módulos.", "correct": true },
+        { "text": "Utilizan carga síncrona.", "correct": false },
+        { "text": "Utilizan la palabra clave require.", "correct": false },
+        { "text": "Requieren la extensión .cjs.", "correct": false }
+      ],
+      "justification": "Una característica clave de ESM es que los módulos pueden compartir un contexto, lo que permite una mejor optimización y características como el tree-shaking. Además, ESM utiliza import/export en lugar de require, soporta carga asíncrona, y utiliza la extensión .mjs o configuración de tipo 'module' en package.json."
+    }
+  ]
+}

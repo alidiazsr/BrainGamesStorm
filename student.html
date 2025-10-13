@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudiante - Brain Games Storm</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="student-header">
+            <nav class="navbar">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-brain"></i>
+                    Brain Games Storm
+                </a>
+                <div class="game-info" id="gameInfo" style="display: none;">
+                    <span class="game-code">Código: <span id="currentGameCode"></span></span>
+                    <span class="player-name">Jugador: <span id="currentPlayerName"></span></span>
+                </div>
+                <button id="soundToggle" class="sound-toggle" onclick="soundSystem.toggleSound()">🔊 Sonido ON</button>
+            </nav>
+        </header>
+
+        <main class="student-main">
+            <!-- Pantalla de unirse al juego -->
+            <div class="join-screen" id="joinScreen">
+                <div class="join-card">
+                    <h1>Únete al Cuestionario</h1>
+                    <form id="joinForm">
+                        <div class="form-group">
+                            <label for="gameCodeInput">Código del Juego</label>
+                            <input type="text" id="gameCodeInput" placeholder="000000" maxlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="playerName">Tu Nombre</label>
+                            <input type="text" id="playerName" placeholder="Escribe tu nombre" required>
+                        </div>
+                        
+                        <!-- Selección de Avatar -->
+                        <div class="avatar-selection">
+                            <label>Elige tu Avatar</label>
+                            <div class="avatar-grid" id="avatarGrid">
+                                <button type="button" class="avatar-btn selected" data-avatar="😎" onclick="selectAvatar('😎', this)">😎</button>
+                                <button type="button" class="avatar-btn" data-avatar="🤓" onclick="selectAvatar('🤓', this)">🤓</button>
+                                <button type="button" class="avatar-btn" data-avatar="😊" onclick="selectAvatar('😊', this)">😊</button>
+                                <button type="button" class="avatar-btn" data-avatar="🙃" onclick="selectAvatar('🙃', this)">🙃</button>
+                                <button type="button" class="avatar-btn" data-avatar="😄" onclick="selectAvatar('😄', this)">😄</button>
+                                <button type="button" class="avatar-btn" data-avatar="🤩" onclick="selectAvatar('🤩', this)">🤩</button>
+                                <button type="button" class="avatar-btn" data-avatar="😇" onclick="selectAvatar('😇', this)">😇</button>
+                                <button type="button" class="avatar-btn" data-avatar="🤗" onclick="selectAvatar('🤗', this)">🤗</button>
+                                <button type="button" class="avatar-btn" data-avatar="🤔" onclick="selectAvatar('🤔', this)">🤔</button>
+                                <button type="button" class="avatar-btn" data-avatar="😌" onclick="selectAvatar('😌', this)">😌</button>
+                                <button type="button" class="avatar-btn" data-avatar="🥳" onclick="selectAvatar('🥳', this)">🥳</button>
+                                <button type="button" class="avatar-btn" data-avatar="🤯" onclick="selectAvatar('🤯', this)">🤯</button>
+                                <button type="button" class="avatar-btn" data-avatar="🙄" onclick="selectAvatar('🙄', this)">🙄</button>
+                                <button type="button" class="avatar-btn" data-avatar="😏" onclick="selectAvatar('😏', this)">😏</button>
+                                <button type="button" class="avatar-btn" data-avatar="🤨" onclick="selectAvatar('🤨', this)">🤨</button>
+                                <button type="button" class="avatar-btn" data-avatar="😮" onclick="selectAvatar('😮', this)">😮</button>
+                                <button type="button" class="avatar-btn" data-avatar="😲" onclick="selectAvatar('😲', this)">😲</button>
+                                <button type="button" class="avatar-btn" data-avatar="🧐" onclick="selectAvatar('🧐', this)">🧐</button>
+                                <button type="button" class="avatar-btn" data-avatar="🤪" onclick="selectAvatar('🤪', this)">🤪</button>
+                                <button type="button" class="avatar-btn" data-avatar="😋" onclick="selectAvatar('😋', this)">😋</button>
+                            </div>
+                            <div class="selected-avatar" id="selectedAvatarDisplay">
+                                <span>Avatar seleccionado:</span>
+                                <span id="selectedAvatarEmoji">😎</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-large">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Unirse al Juego
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pantalla de espera -->
+            <div class="waiting-screen" id="waitingScreen" style="display: none;">
+                <div class="waiting-card">
+                    <div class="spinner">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </div>
+                    <h2>¡Te has unido correctamente!</h2>
+                    <p>Esperando a que el administrador inicie el cuestionario...</p>
+                    <div class="quiz-info" id="quizInfo">
+                        <!-- Información del cuestionario se carga aquí -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de pregunta -->
+            <div class="question-screen" id="questionScreen" style="display: none;">
+                <div class="question-header">
+                    <div class="question-counter">
+                        Pregunta <span id="currentQuestionNumber">1</span> de <span id="totalQuestions">5</span>
+                    </div>
+                    <div class="timer-container">
+                        <div class="timer" id="timer">30</div>
+                        <div class="timer-bar">
+                            <div class="timer-progress" id="timerProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-content">
+                    <h2 class="question-text" id="questionText">¿Cuál es la capital de Francia?</h2>
+                    
+                    <div class="answers-grid" id="answersGrid">
+                        <!-- Las opciones de respuesta se cargan aquí dinámicamente -->
+                    </div>
+                </div>
+
+                <div class="question-footer">
+                    <div class="score-display">
+                        Puntuación: <span id="currentScore">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de resultado de pregunta -->
+            <div class="result-screen" id="resultScreen" style="display: none;">
+                <div class="result-content">
+                    <div class="result-icon" id="resultIcon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h2 class="result-title" id="resultTitle">¡Correcto!</h2>
+                    <p class="result-message" id="resultMessage">Has ganado 1000 puntos</p>
+                    <div class="correct-answer" id="correctAnswerDisplay" style="display: none;">
+                        <p>La respuesta correcta era:</p>
+                        <div class="correct-answer-text" id="correctAnswerText"></div>
+                    </div>
+                    
+                    <!-- Timer para siguiente pantalla -->
+                    <div class="next-screen-timer" id="nextScreenTimer">
+                        <div class="timer-progress-bar">
+                            <div class="timer-progress-fill" id="timerProgressFill"></div>
+                        </div>
+                        <p>Siguiente pantalla en <span id="timerSeconds">3</span> segundos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de ranking parcial -->
+            <div class="partial-ranking-screen" id="partialRankingScreen" style="display: none;">
+                <div class="partial-ranking-content">
+                    <div class="ranking-header">
+                        <h2>🏆 Ranking Actual</h2>
+                        <p>Después de la pregunta <span id="currentQuestionRank">1</span></p>
+                    </div>
+                    
+                    <!-- Sección educativa de la pregunta -->
+                    <div class="question-review-section" id="questionReviewSection">
+                        <div class="question-review-card">
+                            <div class="question-review-header">
+                                <h3><i class="fas fa-lightbulb"></i> Revisión de la Pregunta</h3>
+                            </div>
+                            
+                            <div class="question-text-review" id="questionTextReview">
+                                <!-- Texto de la pregunta se carga dinámicamente -->
+                            </div>
+                            
+                            <div class="correct-answer-section">
+                                <div class="correct-answer-header">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Respuesta Correcta:</span>
+                                </div>
+                                <div class="correct-answer-text" id="correctAnswerText">
+                                    <!-- Respuesta correcta se carga dinámicamente -->
+                                </div>
+                            </div>
+                            
+                            <div class="explanation-section">
+                                <div class="explanation-header">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Explicación:</span>
+                                </div>
+                                <div class="explanation-text" id="explanationText">
+                                    <!-- Justificación se carga dinámicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ranking-podium" id="rankingPodium">
+                        <!-- Top 3 se genera dinámicamente -->
+                    </div>
+                    
+                    <div class="ranking-list" id="partialRankingList">
+                        <!-- Lista completa se genera dinámicamente -->
+                    </div>
+                    
+                    <div class="player-position" id="playerPosition">
+                        <!-- Posición del jugador actual -->
+                    </div>
+                    
+                    <!-- Mensaje de espera en lugar de timer -->
+                    <div class="waiting-for-teacher" id="waitingForTeacher">
+                        <div class="waiting-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <p>Esperando a que la profesora continúe...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pantalla de resultados finales -->
+            <div class="final-screen" id="finalScreen" style="display: none;">
+                <div class="final-content">
+                    <h1>¡Cuestionario Completado!</h1>
+                    <div class="final-score">
+                        <div class="score-circle">
+                            <span class="score-number" id="finalScore">0</span>
+                            <span class="score-label">puntos</span>
+                        </div>
+                    </div>
+                    <div class="final-stats">
+                        <div class="stat">
+                            <span class="stat-number" id="correctAnswers">0</span>
+                            <span class="stat-label">Correctas</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="incorrectAnswers">0</span>
+                            <span class="stat-label">Incorrectas</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="accuracyPercentage">0%</span>
+                            <span class="stat-label">Precisión</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="goHome()">
+                        <i class="fas fa-home"></i>
+                        Volver al Inicio
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pantalla de ranking final compartido -->
+            <div class="shared-final-screen" id="sharedFinalScreen" style="display: none;">
+                <div class="shared-final-content">
+                    <div class="shared-final-header">
+                        <h1>🏆 ¡Cuestionario Completado!</h1>
+                        <p>Resultados finales de <span id="sharedTotalPlayers">0</span> jugadores • <span id="sharedTotalQuestions">0</span> preguntas</p>
+                    </div>
+                    
+                    <!-- Tu resultado personal -->
+                    <div class="shared-player-position" id="sharedPlayerPosition">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                    
+                    <!-- Podium compartido (top 3) -->
+                    <div class="shared-podium-section">
+                        <h2>🥇 Top 3 Ganadores</h2>
+                        <div class="shared-podium" id="sharedPodium">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <!-- Ranking completo -->
+                    <div class="shared-full-ranking-section">
+                        <div class="shared-full-ranking" id="sharedFullRanking">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de acción -->
+                    <div class="shared-final-actions">
+                        <button class="btn btn-primary" onclick="goHome()">
+                            <i class="fas fa-home"></i>
+                            Volver al Inicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="student.js"></script>
+</body>
+</html>

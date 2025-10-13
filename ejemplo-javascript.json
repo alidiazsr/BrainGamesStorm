@@ -1,0 +1,40 @@
+{
+  "name": "JavaScript Básico",
+  "description": "Conceptos fundamentales de JavaScript",
+  "timeLimit": 30,
+  "questions": [
+    {
+      "question": "¿Qué es una variable en JavaScript?",
+      "options": [
+        "Un contenedor para datos",
+        "Una función predefinida",
+        "Un tipo de bucle",
+        "Un método matemático"
+      ],
+      "answer": 0,
+      "justification": "Una variable es un contenedor que almacena valores de datos."
+    },
+    {
+      "question": "¿Cuál de estas palabras clave se usa para declarar una constante?",
+      "options": [
+        "var",
+        "let", 
+        "const",
+        "function"
+      ],
+      "answer": 2,
+      "justification": "const se usa para declarar constantes que no pueden ser reasignadas."
+    },
+    {
+      "question": "¿Qué tipo de dato devuelve typeof null?",
+      "options": [
+        "null",
+        "undefined",
+        "object",
+        "boolean"
+      ],
+      "answer": 2,
+      "justification": "typeof null devuelve 'object', esto es un bug histórico de JavaScript."
+    }
+  ]
+}

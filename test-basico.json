@@ -1,0 +1,10 @@
+{
+  "name": "Test Básico",
+  "questions": [
+    {
+      "question": "¿Pregunta 1?",
+      "options": ["Opción A", "Opción B"],
+      "answer": 0
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Brain Games Storm Files
+*.log
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+node_modules/
+.env
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Games Storm - Cuestionarios Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Estilos específicos para la página de inicio mejorada */
+        .index-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .admin-button-compact {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 8px 16px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        .admin-button-compact:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .hero-section {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .floating-avatars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .avatar-float {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: float 6s ease-in-out infinite;
+            opacity: 0.7;
+        }
+        
+        .avatar-float:nth-child(odd) {
+            animation-direction: reverse;
+        }
+        
+        .avatar-float:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .avatar-float:nth-child(2) { top: 20%; right: 15%; animation-delay: 1s; }
+        .avatar-float:nth-child(3) { top: 60%; left: 5%; animation-delay: 2s; }
+        .avatar-float:nth-child(4) { top: 70%; right: 10%; animation-delay: 3s; }
+        .avatar-float:nth-child(5) { top: 40%; left: 80%; animation-delay: 4s; }
+        .avatar-float:nth-child(6) { top: 85%; left: 20%; animation-delay: 5s; }
+        .avatar-float:nth-child(7) { top: 15%; left: 60%; animation-delay: 1.5s; }
+        .avatar-float:nth-child(8) { top: 50%; right: 25%; animation-delay: 2.5s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(2deg); }
+            50% { transform: translateY(-10px) rotate(-1deg); }
+            75% { transform: translateY(-15px) rotate(1deg); }
+        }
+        
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 0 20px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .join-section {
+            text-align: center;
+        }
+        
+        .join-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .join-description {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .code-input-group {
+            margin-bottom: 25px;
+        }
+        
+        .code-input {
+            width: 100%;
+            padding: 18px 25px;
+            font-size: 1.4rem;
+            border: 3px solid #e0e7ff;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+        
+        .code-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .join-button {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .join-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .join-button:active {
+            transform: translateY(-1px);
+        }
+        
+        .features-mini {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .feature-mini {
+            text-align: center;
+            color: #667eea;
+        }
+        
+        .feature-mini i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .feature-mini span {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .footer-compact {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+        
+        .demo-avatars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .demo-avatar {
+            font-size: 2rem;
+            padding: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .demo-avatar:hover {
+            transform: scale(1.2) rotate(10deg);
+            background: rgba(102, 126, 234, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .main-card {
+                margin: 0 15px;
+                padding: 30px 20px;
+            }
+            
+            .admin-button-compact {
+                position: relative;
+                display: block;
+                margin: 20px auto;
+                width: fit-content;
+            }
+            
+            .avatar-float {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="index-container">
+        <!-- Botón de Admin compacto en la esquina -->
+        <a href="admin.html" class="admin-button-compact">
+            <i class="fas fa-cog"></i> Admin
+        </a>
+        
+        <!-- Avatares flotantes decorativos -->
+        <div class="floating-avatars">
+            <div class="avatar-float">🤓</div>
+            <div class="avatar-float">😎</div>
+            <div class="avatar-float">🥳</div>
+            <div class="avatar-float">🤗</div>
+            <div class="avatar-float">😊</div>
+            <div class="avatar-float">🚀</div>
+            <div class="avatar-float">⭐</div>
+            <div class="avatar-float">🎯</div>
+        </div>
+        
+        <!-- Sección principal hero -->
+        <div class="hero-section">
+            <h1 class="hero-title">
+                <i class="fas fa-brain"></i>
+                Brain Games Storm
+            </h1>
+            <p class="hero-subtitle">
+                ¡Cuestionarios interactivos y súper divertidos!
+            </p>
+        </div>
+        
+        <!-- Tarjeta principal de unirse al juego -->
+        <div class="main-card">
+            <div class="join-section">
+                <h2 class="join-title">
+                    <i class="fas fa-gamepad"></i>
+                    ¡Únete al Juego!
+                </h2>
+                <p class="join-description">
+                    Introduce el código que te dio tu profesor
+                </p>
+                
+                <!-- Avatares de demostración -->
+                <div class="demo-avatars">
+                    <div class="demo-avatar">🤓</div>
+                    <div class="demo-avatar">😎</div>
+                    <div class="demo-avatar">🥳</div>
+                    <div class="demo-avatar">🤗</div>
+                    <div class="demo-avatar">😊</div>
+                </div>
+                
+                <div class="code-input-group">
+                    <input 
+                        type="text" 
+                        id="gameCode" 
+                        class="code-input"
+                        placeholder="CÓDIGO" 
+                        maxlength="6"
+                        autocomplete="off"
+                    >
+                </div>
+                
+                <button class="join-button" onclick="joinGame()">
+                    <i class="fas fa-play"></i>
+                    ¡Empezar a Jugar!
+                </button>
+                
+                <div class="features-mini">
+                    <div class="feature-mini">
+                        <i class="fas fa-bolt"></i>
+                        <span>Tiempo Real</span>
+                    </div>
+                    <div class="feature-mini">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Móvil</span>
+                    </div>
+                    <div class="feature-mini">
+                        <i class="fas fa-trophy"></i>
+                        <span>Rankings</span>
+                    </div>
+                    <div class="feature-mini">
+                        <i class="fas fa-heart"></i>
+                        <span>Divertido</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-compact">
+            <p>
+                <i class="fas fa-rocket"></i>
+                Brain Games Storm 2025 - Aprender nunca fue tan divertido
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Efecto de escritura para el input
+        document.getElementById('gameCode').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase();
+        });
+        
+        // Efecto de enter para enviar
+        document.getElementById('gameCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                joinGame();
+            }
+        });
+        
+        // Animación adicional para avatares demo
+        document.querySelectorAll('.demo-avatar').forEach((avatar, index) => {
+            avatar.addEventListener('mouseenter', function() {
+                this.style.animationDelay = (index * 0.1) + 's';
+            });
+        });
+    </script>
+</body>
+</html>
