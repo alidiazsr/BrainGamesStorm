@@ -10,7 +10,7 @@
         { "text": "Una ruta que utiliza referencias como ./ o ../.", "correct": false },
         { "text": "Es la ubicación completa de un archivo desde la raíz del sistema.", "correct": true }
       ],
-      "justification": "Una ruta absoluta especifica la ubicación completa de un archivo o directorio desde la raíz del sistema de archivos, sin depender de la ubicación actual del usuario. Por ejemplo: C:\\Users\\Usuario\\Desktop\\archivo.txt en Windows o /home/usuario/archivo.txt en Linux."
+      "justification": "Una ruta absoluta especifica la ubicación completa de un archivo o directorio desde la raíz del sistema de archivos, sin depender de la ubicación actual del usuario. Por ejemplo: C:/Users/Usuario/Desktop/archivo.txt en Windows o /home/usuario/archivo.txt en Linux."
     },
     {
       "question": "¿Qué editor de texto se utiliza comúnmente en la terminal y Git Bash?",
