@@ -281,13 +281,34 @@ function initializeAvatar() {
 // ====== INICIALIZACIÓN ======
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay código en la URL
+    // Verificar si hay datos del nuevo sistema autónomo
     const urlParams = new URLSearchParams(window.location.search);
-    const gameCode = urlParams.get('code');
+    const gameCode = urlParams.get('gameCode');
+    const quizData = urlParams.get('quizData');
     
-    if (gameCode) {
+    if (gameCode && quizData) {
+        // Nuevo sistema autónomo - pre-llenar código y ocultar campo
         document.getElementById('gameCodeInput').value = gameCode;
-        document.getElementById('gameCodeInput').focus();
+        document.getElementById('gameCodeInput').style.display = 'none';
+        document.querySelector('label[for="gameCodeInput"]').style.display = 'none';
+        
+        // Mostrar mensaje informativo
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = 'background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;';
+        infoDiv.innerHTML = '<strong><i class="fas fa-check-circle" style="color: #4caf50;"></i> Conectado al juego: ' + gameCode + '</strong><br><small>Solo ingresa tu nombre y avatar para continuar</small>';
+        
+        const form = document.getElementById('joinForm');
+        form.insertBefore(infoDiv, form.firstChild);
+        
+        // Enfocar en el nombre
+        document.getElementById('playerName').focus();
+    } else {
+        // Sistema antiguo - verificar código normal
+        const oldGameCode = urlParams.get('code');
+        if (oldGameCode) {
+            document.getElementById('gameCodeInput').value = oldGameCode;
+            document.getElementById('gameCodeInput').focus();
+        }
     }
     
     // Inicializar sistema de avatares
@@ -354,19 +375,51 @@ function handleJoinGame(e) {
 
 function joinGame(gameCode, playerName) {
     try {
-        // Verificar que el juego existe
-        const game = getActiveGame(gameCode);
-        if (!game) {
-            alert('Código de juego inválido o el juego no está activo');
-            return;
-        }
+        // Verificar si es el nuevo sistema autónomo
+        const urlParams = new URLSearchParams(window.location.search);
+        const quizData = urlParams.get('quizData');
         
-        // Agregar jugador al juego (incluyendo avatar)
-        const playerId = addPlayerToGame(gameCode, playerName, getPlayerAvatar());
-        
-        // Guardar datos del jugador
-        currentGameCode = gameCode;
-        currentPlayerId = playerId;
+        if (quizData) {
+            // Nuevo sistema autónomo
+            const game = joinStandaloneGame();
+            if (!game) {
+                alert('Error al acceder al juego. Verifica el enlace proporcionado por el profesor.');
+                return;
+            }
+            
+            const playerId = addPlayerToStandaloneGame(gameCode, playerName, getPlayerAvatar());
+            if (!playerId) {
+                alert('Error al unirse al juego');
+                return;
+            }
+            
+            // Guardar datos del jugador
+            currentGameCode = gameCode;
+            currentPlayerId = playerId;
+            currentPlayerName = playerName;
+            currentQuiz = game.quiz;
+            
+            // Cambiar a pantalla de espera
+            showScreen('waitingScreen');
+            updateWaitingScreen();
+            
+            // Mostrar mensaje de éxito
+            soundSystem.playWelcome();
+            
+        } else {
+            // Sistema antiguo
+            const game = getActiveGame(gameCode);
+            if (!game) {
+                alert('Código de juego inválido o el juego no está activo');
+                return;
+            }
+            
+            // Agregar jugador al juego (incluyendo avatar)
+            const playerId = addPlayerToGame(gameCode, playerName, getPlayerAvatar());
+            
+            // Guardar datos del jugador
+            currentGameCode = gameCode;
+            currentPlayerId = playerId;
         currentPlayerName = playerName;
         currentQuiz = game.quiz;
         playerScore = 0;
@@ -383,23 +436,26 @@ function joinGame(gameCode, playerName) {
         // Configurar listener para actualizaciones del juego
         setupGameUpdateListener();
         
-        // Mostrar pantalla de espera
-        showScreen('waitingScreen');
-        
-        // Reproducir sonido de inicio de pregunta al unirse al juego
-        setTimeout(() => {
-            soundSystem.playQuestionStart();
-        }, 500);
-        
-        // Broadcast que un jugador se unió
-        broadcastGameUpdate(gameCode, 'player_joined', {
-            playerId: playerId,
-            playerName: playerName,
-            avatar: getPlayerAvatar()
-        });
+            // Configurar información del juego
+            document.getElementById('currentGameCode').textContent = gameCode;
+            document.getElementById('currentPlayerName').textContent = playerName;
+            document.getElementById('gameInfo').style.display = 'flex';
+            
+            // Mostrar información del quiz
+            updateQuizInfo();
+            
+            // Mostrar pantalla de espera
+            showScreen('waitingScreen');
+            
+            // Reproducir sonido de bienvenida
+            setTimeout(() => {
+                soundSystem.playWelcome();
+            }, 500);
+        }
         
     } catch (error) {
-        showJoinError(error.message);
+        console.error('Error al unirse al juego:', error);
+        alert('Error al unirse al juego: ' + error.message);
     }
 }
 
