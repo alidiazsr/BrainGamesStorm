@@ -339,85 +339,45 @@ function startQuiz(quizId) {
         return;
     }
     
-    // Verificar si Firebase está configurado
-    if (typeof firebase !== 'undefined' && window.firebaseConfigured) {
-        // Usar Firebase (SOLUCIÓN DEFINITIVA)
+    // Verificar si Firebase está listo
+    if (window.firebaseConfigured && typeof startQuizWithFirebase === 'function') {
+        // Usar Firebase (FUNCIONA DESDE CUALQUIER DISPOSITIVO)
+        console.log('🔥 Usando Firebase para múltiples dispositivos');
         startQuizWithFirebase(quizId);
         return;
     }
     
-    // Si no hay Firebase, mostrar opciones
-    showSystemSelectionModal(quizId, quiz);
-}
-
-function showSystemSelectionModal(quizId, quiz) {
-    const modal = document.createElement('div');
-    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000; overflow-y: auto;';
-    modal.innerHTML = 
-        '<div style="background: white; padding: 30px; border-radius: 15px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto;">' +
-            '<h2 style="margin: 0 0 20px 0; color: #333; text-align: center;"><i class="fas fa-rocket"></i> Elegir Sistema para: ' + quiz.title + '</h2>' +
-            
-            '<div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 20px; border-radius: 8px; margin: 20px 0;">' +
-                '<h3 style="margin: 0 0 15px 0; color: #1976d2;"><i class="fas fa-info-circle"></i> ¿Qué necesitas?</h3>' +
-                '<p style="margin: 0; color: #333;">Para que funcione desde <strong>cualquier dispositivo/red</strong>, necesitas un servidor en la nube.</p>' +
-            '</div>' +
-            
-            '<div style="display: grid; gap: 15px; margin: 20px 0;">' +
-                
-                '<div style="border: 2px solid #4caf50; border-radius: 12px; padding: 20px; background: #f1f8e9; position: relative;">' +
-                    '<div style="position: absolute; top: -10px; right: 10px; background: #4caf50; color: white; padding: 5px 15px; border-radius: 15px; font-size: 12px; font-weight: bold;">RECOMENDADO</div>' +
-                    '<h4 style="margin: 0 0 10px 0; color: #2e7d32;"><i class="fas fa-fire"></i> Firebase - Gratis para Siempre</h4>' +
-                    '<p style="margin: 0 0 15px 0; color: #333; font-size: 14px;">• Funciona desde cualquier dispositivo del mundo<br>• Tiempo real automático<br>• 1GB gratis (≈500,000 quizzes)<br>• Setup: 15 minutos</p>' +
-                    '<button onclick="setupFirebase()" style="background: #4caf50; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; width: 100%;"><i class="fas fa-rocket"></i> Configurar Firebase (15 min)</button>' +
-                '</div>' +
-                
-                '<div style="border: 2px solid #ff9800; border-radius: 12px; padding: 20px; background: #fff3e0;">' +
-                    '<h4 style="margin: 0 0 10px 0; color: #f57c00;"><i class="fas fa-file-alt"></i> Sistema de Archivos (Actual)</h4>' +
-                    '<p style="margin: 0 0 15px 0; color: #333; font-size: 14px;">• Solo funciona en la misma red<br>• Requiere subir archivos manualmente<br>• ❌ No resuelve tu problema actual</p>' +
-                    '<button onclick="useFileSystem(' + quizId + ')" style="background: #ff9800; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; width: 100%;"><i class="fas fa-folder"></i> Usar Sistema Actual</button>' +
-                '</div>' +
-                
-                '<details style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: #f9f9f9;">' +
-                    '<summary style="cursor: pointer; font-weight: bold; color: #666;"><i class="fas fa-cog"></i> Opciones Avanzadas</summary>' +
-                    '<div style="margin-top: 15px; font-size: 14px;">' +
-                        '<p><strong>💪 PHP/MySQL:</strong> Si tienes hosting web con base de datos</p>' +
-                        '<p><strong>⚡ Node.js:</strong> Si quieres máximo rendimiento y control</p>' +
-                        '<p><strong>🛠️ Otros servicios:</strong> Supabase, Railway, etc.</p>' +
-                        '<button onclick="showAdvancedOptions(' + quizId + ')" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-top: 10px;">Ver Opciones Avanzadas</button>' +
-                    '</div>' +
-                '</details>' +
-            '</div>' +
-            
-            '<div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0;">' +
-                '<h4 style="margin: 0 0 10px 0; color: #856404;"><i class="fas fa-lightbulb"></i> Recomendación</h4>' +
-                '<p style="margin: 0; color: #856404; font-size: 14px;">Para resolver definitivamente el problema de <strong>"código inválido desde otros dispositivos"</strong>, elige Firebase. Es gratis y funciona perfectamente.</p>' +
-            '</div>' +
-            
-            '<div style="text-align: center; margin-top: 20px;">' +
-                '<button onclick="this.closest(\'div\').closest(\'div\').remove()" style="padding: 12px 24px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">Cancelar</button>' +
-            '</div>' +
-        '</div>';
+    // Si Firebase no está listo, intentar inicializarlo
+    if (typeof initializeFirebase === 'function') {
+        console.log('🔄 Intentando inicializar Firebase...');
+        setTimeout(() => {
+            if (window.firebaseConfigured) {
+                startQuizWithFirebase(quizId);
+            } else {
+                // Fallback al sistema de archivos
+                console.log('⚠️ Firebase no disponible, usando sistema de archivos');
+                useFileSystemWithWarning(quizId, quiz);
+            }
+        }, 2000);
+        return;
+    }
     
-    document.body.appendChild(modal);
+    // Fallback final
+    useFileSystemWithWarning(quizId, quiz);
 }
 
-function setupFirebase() {
-    window.open('firebase-setup.html', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
-}
-
-function useFileSystem(quizId) {
-    // Cerrar modal
-    const modal = document.querySelector('[style*="position: fixed"]');
-    if (modal) modal.remove();
-    
-    // Confirmar inicio del quiz
-    const quiz = getQuizById(quizId);
-    if (!confirm('¿Iniciar el cuestionario "' + quiz.title + '"?\n\n' + quiz.questions.length + ' preguntas • ' + (quiz.timeLimit || 30) + 's por pregunta\n\n⚠️ NOTA: Este sistema solo funciona en la misma red. Para otros dispositivos, configura Firebase.')) {
+function useFileSystemWithWarning(quizId, quiz) {
+    // Confirmar con advertencia
+    if (!confirm('⚠️ ADVERTENCIA: Sistema Firebase no disponible\n\n' + 
+                 'El cuestionario "' + quiz.title + '" se iniciará con el sistema de archivos.\n\n' +
+                 '❌ LIMITACIÓN: Solo funcionará en la misma red\n' +
+                 '✅ Para que funcione desde cualquier dispositivo, necesitas Firebase configurado\n\n' +
+                 '¿Continuar con el sistema limitado?')) {
         return;
     }
     
     try {
-        // Usar el sistema de archivos estáticos
+        // Usar el sistema de archivos como fallback
         createStaticGameFile(quizId);
         
     } catch (error) {

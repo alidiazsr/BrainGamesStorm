@@ -1,16 +1,15 @@
 // ====== SISTEMA DE FIREBASE PARA MÚLTIPLES DISPOSITIVOS ======
 // Este sistema permite que funcione desde cualquier red/dispositivo
 
-// Configuración de Firebase (se configurará automáticamente)
-let firebaseConfig = {
-    // Se llenará automáticamente desde la configuración del usuario
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
+// Configuración de Firebase (tu proyecto real)
+const firebaseConfig = {
+    apiKey: "AIzaSyDLIQ_kPXmplHgaJvvtVDgSpTxVoAgisjA",
+    authDomain: "braingamesstorm.firebaseapp.com",
+    databaseURL: "https://braingamesstorm-default-rtdb.firebaseio.com",
+    projectId: "braingamesstorm",
+    storageBucket: "braingamesstorm.firebasestorage.app",
+    messagingSenderId: "408925735981",
+    appId: "1:408925735981:web:d39d3daa13f44408547ca4"
 };
 
 // Variables globales de Firebase
@@ -18,84 +17,30 @@ let db = null;
 let isFirebaseInitialized = false;
 window.firebaseConfigured = false;
 
-// ====== CONFIGURACIÓN AUTOMÁTICA ======
-
-function configureFirebase(config) {
-    try {
-        firebaseConfig = config;
-        localStorage.setItem('brainGamesFirebaseConfig', JSON.stringify(config));
-        
-        // Intentar inicializar
-        if (initializeFirebase()) {
-            window.firebaseConfigured = true;
-            showFirebaseSuccessMessage();
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.error('Error configurando Firebase:', error);
-        return false;
-    }
-}
-
-function loadFirebaseConfig() {
-    try {
-        const stored = localStorage.getItem('brainGamesFirebaseConfig');
-        if (stored) {
-            firebaseConfig = JSON.parse(stored);
-            if (initializeFirebase()) {
-                window.firebaseConfigured = true;
-                console.log('✅ Firebase configurado desde localStorage');
-                return true;
-            }
-        }
-        return false;
-    } catch (error) {
-        console.error('Error cargando configuración Firebase:', error);
-        return false;
-    }
-}
-
-function showFirebaseSuccessMessage() {
-    const message = document.createElement('div');
-    message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #4caf50; color: white; padding: 15px 20px; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);';
-    message.innerHTML = '🔥 ¡Firebase configurado! Ahora funciona desde cualquier dispositivo';
-    document.body.appendChild(message);
-    
-    setTimeout(() => {
-        if (document.body.contains(message)) {
-            document.body.removeChild(message);
-        }
-    }, 5000);
-}
-
 // ====== INICIALIZACIÓN DE FIREBASE ======
 
 function initializeFirebase() {
     try {
         // Verificar si Firebase ya está cargado
         if (typeof firebase === 'undefined') {
-            console.warn('❌ Firebase SDK no está cargado. Agregando scripts...');
+            console.log('🔄 Cargando Firebase SDK...');
             loadFirebaseScripts();
-            return false;
-        }
-
-        // Verificar configuración
-        if (!firebaseConfig.apiKey) {
-            console.warn('❌ Configuración Firebase vacía');
             return false;
         }
 
         // Inicializar Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
+            console.log('🔥 Firebase inicializado con proyecto:', firebaseConfig.projectId);
         }
         
         // Obtener referencia a la base de datos
         db = firebase.database();
         isFirebaseInitialized = true;
+        window.firebaseConfigured = true;
         
-        console.log('✅ Firebase inicializado correctamente');
+        console.log('✅ Firebase listo para usar');
+        showFirebaseReadyMessage();
         return true;
         
     } catch (error) {
@@ -120,14 +65,28 @@ function loadFirebaseScripts() {
             if (loaded === scripts.length) {
                 console.log('✅ Firebase SDK cargado');
                 setTimeout(() => {
-                    if (firebaseConfig.apiKey) {
-                        initializeFirebase();
-                    }
-                }, 1000);
+                    initializeFirebase();
+                }, 500);
             }
+        };
+        script.onerror = () => {
+            console.error('❌ Error cargando Firebase SDK:', src);
         };
         document.head.appendChild(script);
     });
+}
+
+function showFirebaseReadyMessage() {
+    const message = document.createElement('div');
+    message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #4caf50; color: white; padding: 15px 20px; border-radius: 8px; z-index: 10000; font-weight: 600; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);';
+    message.innerHTML = '🔥 ¡Firebase conectado! Sistema listo para múltiples dispositivos';
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        if (document.body.contains(message)) {
+            document.body.removeChild(message);
+        }
+    }, 4000);
 }
 
 // ====== FUNCIONES DE JUEGO CON FIREBASE ======
@@ -410,31 +369,14 @@ function showToast(message) {
 // ====== AUTO-INICIALIZACIÓN ======
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Cargar configuración guardada si existe
-    loadFirebaseConfig();
-    
-    // Escuchar mensajes del configurador
-    window.addEventListener('message', function(event) {
-        if (event.data && event.data.type === 'firebase-config') {
-            configureFirebase(event.data.config);
-        }
-    });
-    
-    // Verificar si viene de setup
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('firebase-setup') === 'true') {
-        // Intentar cargar configuración
-        setTimeout(() => {
-            if (!window.firebaseConfigured) {
-                alert('⚠️ Configuración Firebase no encontrada.\n\nPor favor, completa la configuración en firebase-setup.html');
-                window.open('firebase-setup.html', '_blank');
-            }
-        }, 2000);
-    }
+    // Intentar inicializar Firebase automáticamente
+    console.log('🔄 Iniciando sistema Firebase...');
+    setTimeout(() => {
+        initializeFirebase();
+    }, 1000);
 });
 
-// ====== FUNCIONES DE UTILIDAD PÚBLICAS ======
+// ====== FUNCIONES PÚBLICAS ======
 
-window.configureFirebase = configureFirebase;
 window.initializeFirebase = initializeFirebase;
 window.startQuizWithFirebase = startQuizWithFirebase;
