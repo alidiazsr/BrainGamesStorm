@@ -21,10 +21,10 @@ function startQuizWithQR(quizId) {
         
         // Crear URL que incluye el quiz completo en los parámetros
         const baseURL = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
-        const gameURL = `${baseURL}join.html?code=${gameCode}&quiz=${encodeURIComponent(JSON.stringify(quiz))}`;
+        const gameURL = baseURL + 'join.html?code=' + gameCode + '&quiz=' + encodeURIComponent(JSON.stringify(quiz));
         
         // Guardar también en localStorage como backup
-        localStorage.setItem(`game_${gameCode}`, JSON.stringify({
+        localStorage.setItem('game_' + gameCode, JSON.stringify({
             quiz: quiz,
             players: [],
             status: 'waiting',
@@ -38,67 +38,62 @@ function startQuizWithQR(quizId) {
         
     } catch (error) {
         console.error('Error al crear el juego:', error);
-        alert('Error al crear el juego');
+        alert('Error al crear el juego: ' + error.message);
     }
 }
 
 function showQRGameModal(gameURL, gameCode, quizTitle) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-qrcode"></i> Código del Juego</h2>
-                <button class="close-btn" onclick="this.closest('.modal-overlay').remove()">×</button>
-            </div>
-            <div class="modal-body">
-                <h3>${quizTitle}</h3>
-                
-                <div class="game-code-display">
-                    <h1 style="font-size: 3em; color: #667eea; margin: 20px 0;">${gameCode}</h1>
-                    <p><strong>Los estudiantes pueden:</strong></p>
-                    <ul style="text-align: left; margin: 20px 0;">
-                        <li>🌐 Ir a: <strong>alidiazsr.github.io/BrainGamesStorm</strong></li>
-                        <li>🔢 Ingresar el código: <strong>${gameCode}</strong></li>
-                        <li>📱 O escanear este código QR:</li>
-                    </ul>
-                </div>
-                
-                <div class="qr-container">
-                    <div id="qrCode"></div>
-                </div>
-                
-                <div class="url-container">
-                    <label>URL directa (opcional):</label>
-                    <input type="text" id="gameURLInput" value="${gameURL}" readonly>
-                    <button class="btn btn-primary" onclick="copyGameURL()">
-                        <i class="fas fa-copy"></i> Copiar URL
-                    </button>
-                </div>
-                
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">
-                        Cerrar
-                    </button>
-                    <button class="btn btn-primary" onclick="openTeacherControl('${gameCode}')">
-                        <i class="fas fa-play"></i> Abrir Control del Profesor
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
+    modal.innerHTML = 
+        '<div class="modal-content">' +
+            '<div class="modal-header">' +
+                '<h2><i class="fas fa-qrcode"></i> Código del Juego</h2>' +
+                '<button class="close-btn" onclick="this.closest(\'.modal-overlay\').remove()">×</button>' +
+            '</div>' +
+            '<div class="modal-body">' +
+                '<h3>' + quizTitle + '</h3>' +
+                '<div class="game-code-display">' +
+                    '<h1 style="font-size: 3em; color: #667eea; margin: 20px 0;">' + gameCode + '</h1>' +
+                    '<p><strong>Los estudiantes pueden:</strong></p>' +
+                    '<ul style="text-align: left; margin: 20px 0;">' +
+                        '<li>🌐 Ir a: <strong>alidiazsr.github.io/BrainGamesStorm</strong></li>' +
+                        '<li>🔢 Ingresar el código: <strong>' + gameCode + '</strong></li>' +
+                        '<li>📱 O escanear este código QR:</li>' +
+                    '</ul>' +
+                '</div>' +
+                '<div class="qr-container">' +
+                    '<div id="qrCode"></div>' +
+                '</div>' +
+                '<div class="url-container">' +
+                    '<label>URL directa (opcional):</label>' +
+                    '<input type="text" id="gameURLInput" value="' + gameURL + '" readonly>' +
+                    '<button class="btn btn-primary" onclick="copyGameURL()">' +
+                        '<i class="fas fa-copy"></i> Copiar URL' +
+                    '</button>' +
+                '</div>' +
+                '<div class="modal-actions">' +
+                    '<button class="btn btn-secondary" onclick="this.closest(\'.modal-overlay\').remove()">' +
+                        'Cerrar' +
+                    '</button>' +
+                    '<button class="btn btn-primary" onclick="openTeacherControl(\'' + gameCode + '\')">' +
+                        '<i class="fas fa-play"></i> Abrir Control del Profesor' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
     
     document.body.appendChild(modal);
     
     // Generar código QR que apunte a la página principal con el código
-    const qrURL = `${window.location.origin}${window.location.pathname.replace(/\/[^\/]*$/, '/index.html')}?code=${gameCode}`;
+    const qrURL = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/index.html') + '?code=' + gameCode;
     generateQRCode(qrURL);
 }
 
 function generateQRCode(url) {
     const qrContainer = document.getElementById('qrCode');
-    const qrAPIURL = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-    qrContainer.innerHTML = `<img src="${qrAPIURL}" alt="Código QR" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;">`;
+    const qrAPIURL = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+    qrContainer.innerHTML = '<img src="' + qrAPIURL + '" alt="Código QR" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;">';
 }
 
 function copyGameURL() {
@@ -119,7 +114,7 @@ function copyGameURL() {
 
 function openTeacherControl(gameCode) {
     // Abrir control del profesor
-    const controlURL = `admin-control.html?code=${gameCode}`;
+    const controlURL = 'admin-control.html?code=' + gameCode;
     window.open(controlURL, '_blank', 'width=1200,height=800');
 }
 
@@ -137,7 +132,7 @@ function joinGameByCode(gameCode) {
 }
 
 function addPlayerToGame(gameCode, playerName, avatar) {
-    const gameData = localStorage.getItem(`game_${gameCode}`);
+    const gameData = localStorage.getItem('game_' + gameCode);
     if (!gameData) return null;
     
     const game = JSON.parse(gameData);
@@ -160,7 +155,7 @@ function addPlayerToGame(gameCode, playerName, avatar) {
     });
     
     // Guardar cambios
-    localStorage.setItem(`game_${gameCode}`, JSON.stringify(game));
+    localStorage.setItem('game_' + gameCode, JSON.stringify(game));
     
     return playerId;
 }

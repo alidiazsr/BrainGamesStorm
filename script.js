@@ -24,16 +24,24 @@ function joinGame() {
         return;
     }
     
-    // Verificar si el juego existe
-    const activeGames = JSON.parse(localStorage.getItem('activeGames') || '{}');
-    
-    if (!activeGames[gameCode]) {
-        alert('Código de juego inválido o el juego no está activo');
+    // Verificar si el juego existe en el nuevo sistema QR
+    const qrGameData = localStorage.getItem(`game_${gameCode}`);
+    if (qrGameData) {
+        // Juego encontrado en sistema QR - redirigir a student.html
+        window.location.href = `student.html?code=${gameCode}`;
         return;
     }
     
-    // Redirigir a la página de estudiante con el código
-    window.location.href = `student.html?code=${gameCode}`;
+    // Verificar en el sistema antiguo como fallback
+    const activeGames = JSON.parse(localStorage.getItem('activeGames') || '{}');
+    if (activeGames[gameCode]) {
+        // Juego encontrado en sistema antiguo - redirigir a student.html
+        window.location.href = `student.html?code=${gameCode}`;
+        return;
+    }
+    
+    // Si no se encuentra en ningún sistema
+    alert('Código de juego inválido o el juego no está activo.\n\nVerifica:\n• Que el código esté bien escrito\n• Que el profesor haya iniciado el juego\n• Que estés en el mismo dispositivo o red que el profesor');
 }
 
 // ====== FUNCIONES DE UTILIDAD ======
@@ -206,6 +214,13 @@ function createActiveGame(quizId, gameCode) {
 // Obtener juego activo
 function getActiveGame(gameCode) {
     try {
+        // Primero verificar en el nuevo sistema QR
+        const qrGameData = localStorage.getItem('game_' + gameCode);
+        if (qrGameData) {
+            return JSON.parse(qrGameData);
+        }
+        
+        // Si no está en QR, verificar en el sistema antiguo
         const activeGames = JSON.parse(localStorage.getItem('activeGames') || '{}');
         return activeGames[gameCode] || null;
     } catch (error) {
@@ -217,6 +232,15 @@ function getActiveGame(gameCode) {
 // Actualizar juego activo
 function updateActiveGame(gameCode, gameData) {
     try {
+        // Verificar si existe en sistema QR
+        const qrGameData = localStorage.getItem('game_' + gameCode);
+        if (qrGameData) {
+            const updatedGame = { ...JSON.parse(qrGameData), ...gameData };
+            localStorage.setItem('game_' + gameCode, JSON.stringify(updatedGame));
+            return updatedGame;
+        }
+        
+        // Si no está en QR, actualizar en sistema antiguo
         const activeGames = JSON.parse(localStorage.getItem('activeGames') || '{}');
         if (activeGames[gameCode]) {
             activeGames[gameCode] = { ...activeGames[gameCode], ...gameData };
