@@ -353,7 +353,54 @@
     </div>
 
     <script src="script.js"></script>
+    <script src="qr-game-system.js"></script>
     <script>
+        // Al cargar la página, verificar si viene de un código QR
+        document.addEventListener('DOMContentLoaded', function() {
+            checkForQRCode();
+        });
+        
+        function checkForQRCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeFromQR = urlParams.get('code');
+            
+            if (codeFromQR) {
+                // Si viene de QR, pre-llenar el código
+                const gameCodeInput = document.getElementById('gameCode');
+                if (gameCodeInput) {
+                    gameCodeInput.value = codeFromQR;
+                    gameCodeInput.focus();
+                    
+                    // Mostrar mensaje de que vino de QR
+                    const notification = document.createElement('div');
+                    notification.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: #28a745;
+                        color: white;
+                        padding: 15px 25px;
+                        border-radius: 8px;
+                        z-index: 10000;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                        font-weight: bold;
+                    `;
+                    notification.innerHTML = `
+                        <i class="fas fa-qrcode"></i> 
+                        Código detectado desde QR: ${codeFromQR}
+                        <br><small>Ingresa tu nombre para continuar</small>
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    // Quitar notificación después de 4 segundos
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 4000);
+                }
+            }
+        }
+        
         // Efecto de escritura para el input
         document.getElementById('gameCode').addEventListener('input', function(e) {
             this.value = this.value.toUpperCase();

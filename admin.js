@@ -345,9 +345,9 @@ function startQuiz(quizId) {
     }
     
     try {
-        // Usar el nuevo sistema de URLs
-        if (typeof startQuizWithURL === 'function') {
-            startQuizWithURL(quizId);
+        // Usar el nuevo sistema de códigos QR
+        if (typeof startQuizWithQR === 'function') {
+            startQuizWithQR(quizId);
         } else {
             // Fallback al sistema antiguo si no está disponible
             startQuizOldSystem(quizId);
