@@ -464,33 +464,33 @@ function handleJsonFileImport(event) {
             // Validar cada pregunta
             for (let i = 0; i < quizData.questions.length; i++) {
                 const q = quizData.questions[i];
-                console.log(`🔍 Validando pregunta ${i + 1}:`, q);
+                console.log('Validando pregunta ' + (i + 1) + ':', q);
                 
                 if (!q.question) {
-                    console.log(`❌ Error en pregunta ${i + 1}: falta texto de pregunta`);
-                    alert(`Error en pregunta ${i + 1}: debe tener "question"`);
+                    console.log('Error en pregunta ' + (i + 1) + ': falta texto de pregunta');
+                    alert('Error en pregunta ' + (i + 1) + ': debe tener "question"');
                     return;
                 }
                 
                 // Formato nuevo: "answers" con objetos {text, correct}
                 if (q.answers && Array.isArray(q.answers)) {
                     if (q.answers.length < 2) {
-                        console.log(`❌ Error en pregunta ${i + 1}: pocas respuestas`);
-                        alert(`Error en pregunta ${i + 1}: debe tener al menos 2 respuestas`);
+                        console.log('Error en pregunta ' + (i + 1) + ': pocas respuestas');
+                        alert('Error en pregunta ' + (i + 1) + ': debe tener al menos 2 respuestas');
                         return;
                     }
                     
                     const correctAnswers = q.answers.filter(a => a.correct === true);
                     if (correctAnswers.length !== 1) {
-                        console.log(`❌ Error en pregunta ${i + 1}: respuestas correctas inválidas`);
-                        alert(`Error en pregunta ${i + 1}: debe tener exactamente una respuesta marcada como "correct": true`);
+                        console.log('Error en pregunta ' + (i + 1) + ': respuestas correctas inválidas');
+                        alert('Error en pregunta ' + (i + 1) + ': debe tener exactamente una respuesta marcada como "correct": true');
                         return;
                     }
                     
                     for (let j = 0; j < q.answers.length; j++) {
                         if (!q.answers[j].text || typeof q.answers[j].correct !== 'boolean') {
-                            console.log(`❌ Error en pregunta ${i + 1}, respuesta ${j + 1}: formato inválido`);
-                            alert(`Error en pregunta ${i + 1}: cada respuesta debe tener "text" y "correct" (boolean)`);
+                            console.log('Error en pregunta ' + (i + 1) + ', respuesta ' + (j + 1) + ': formato inválido');
+                            alert('Error en pregunta ' + (i + 1) + ': cada respuesta debe tener "text" y "correct" (boolean)');
                             return;
                         }
                     }
@@ -498,24 +498,24 @@ function handleJsonFileImport(event) {
                 // Formato viejo: "options" con array de strings + "answer" numérico
                 else if (q.options && Array.isArray(q.options)) {
                     if (q.options.length < 2) {
-                        console.log(`❌ Error en pregunta ${i + 1}: pocas opciones`);
-                        alert(`Error en pregunta ${i + 1}: debe tener al menos 2 opciones`);
+                        console.log('Error en pregunta ' + (i + 1) + ': pocas opciones');
+                        alert('Error en pregunta ' + (i + 1) + ': debe tener al menos 2 opciones');
                         return;
                     }
                     if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
-                        console.log(`❌ Error en pregunta ${i + 1}: answer inválido`);
-                        alert(`Error en pregunta ${i + 1}: "answer" debe ser un número válido (índice de la opción correcta)`);
+                        console.log('Error en pregunta ' + (i + 1) + ': answer inválido');
+                        alert('Error en pregunta ' + (i + 1) + ': "answer" debe ser un número válido (índice de la opción correcta)');
                         return;
                     }
                 }
                 else {
-                    console.log(`❌ Error en pregunta ${i + 1}: formato no reconocido`);
-                    alert(`Error en pregunta ${i + 1}: debe tener "answers" (formato nuevo) o "options" + "answer" (formato viejo)`);
+                    console.log('Error en pregunta ' + (i + 1) + ': formato no reconocido');
+                    alert('Error en pregunta ' + (i + 1) + ': debe tener "answers" (formato nuevo) o "options" + "answer" (formato viejo)');
                     return;
                 }
             }
             
-            console.log('✅ Todas las preguntas son válidas');
+            console.log('Todas las preguntas son válidas');
             
             // Crear cuestionario con formato compatible
             const quiz = {
@@ -561,13 +561,8 @@ function handleJsonFileImport(event) {
             event.target.value = '';
             
             // Mostrar detalles de lo importado
-            const questionSummary = quiz.questions.map((q, i) => `${i + 1}. ${q.text}`).join('\n');
-            alert(`✅ Cuestionario importado exitosamente!
-
-📋 Título: ${quiz.title}
-📝 Descripción: ${quiz.description || 'Sin descripción'}
-⏱️ Tiempo límite: ${quiz.timeLimit} segundos
-📊 Preguntas importadas: ${quiz.questions.length}
+            const questionSummary = quiz.questions.map((q, i) => (i + 1) + '. ' + q.text).join('\n');
+            alert('Cuestionario importado exitosamente!\n\nTítulo: ' + quiz.title + '\nDescripción: ' + (quiz.description || 'Sin descripción') + '\nTiempo límite: ' + quiz.timeLimit + ' segundos\nPreguntas importadas: ' + quiz.questions.length);
 
 Preguntas:
 ${questionSummary}`);
