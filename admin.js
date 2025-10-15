@@ -443,18 +443,55 @@ function handleJsonFileImport(event) {
             }
             
             // Validar cada pregunta
-            for (let i = 0; i < jsonData.questions.length; i++) {
-                const q = jsonData.questions[i];
+            for (let i = 0; i < quizData.questions.length; i++) {
+                const q = quizData.questions[i];
                 console.log(`🔍 Validando pregunta ${i + 1}:`, q);
                 
-                if (!q.question || !q.options || !Array.isArray(q.options) || q.options.length < 2) {
-                    console.log(`❌ Error en pregunta ${i + 1}: estructura inválida`);
-                    alert(`Error en pregunta ${i + 1}: debe tener "question" y "options" (array con al menos 2 opciones)`);
+                if (!q.question) {
+                    console.log(`❌ Error en pregunta ${i + 1}: falta texto de pregunta`);
+                    alert(`Error en pregunta ${i + 1}: debe tener "question"`);
                     return;
                 }
-                if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
-                    console.log(`❌ Error en pregunta ${i + 1}: answer inválido`);
-                    alert(`Error en pregunta ${i + 1}: "answer" debe ser un número válido (índice de la opción correcta)`);
+                
+                // Formato nuevo: "answers" con objetos {text, correct}
+                if (q.answers && Array.isArray(q.answers)) {
+                    if (q.answers.length < 2) {
+                        console.log(`❌ Error en pregunta ${i + 1}: pocas respuestas`);
+                        alert(`Error en pregunta ${i + 1}: debe tener al menos 2 respuestas`);
+                        return;
+                    }
+                    
+                    const correctAnswers = q.answers.filter(a => a.correct === true);
+                    if (correctAnswers.length !== 1) {
+                        console.log(`❌ Error en pregunta ${i + 1}: respuestas correctas inválidas`);
+                        alert(`Error en pregunta ${i + 1}: debe tener exactamente una respuesta marcada como "correct": true`);
+                        return;
+                    }
+                    
+                    for (let j = 0; j < q.answers.length; j++) {
+                        if (!q.answers[j].text || typeof q.answers[j].correct !== 'boolean') {
+                            console.log(`❌ Error en pregunta ${i + 1}, respuesta ${j + 1}: formato inválido`);
+                            alert(`Error en pregunta ${i + 1}: cada respuesta debe tener "text" y "correct" (boolean)`);
+                            return;
+                        }
+                    }
+                }
+                // Formato viejo: "options" con array de strings + "answer" numérico
+                else if (q.options && Array.isArray(q.options)) {
+                    if (q.options.length < 2) {
+                        console.log(`❌ Error en pregunta ${i + 1}: pocas opciones`);
+                        alert(`Error en pregunta ${i + 1}: debe tener al menos 2 opciones`);
+                        return;
+                    }
+                    if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
+                        console.log(`❌ Error en pregunta ${i + 1}: answer inválido`);
+                        alert(`Error en pregunta ${i + 1}: "answer" debe ser un número válido (índice de la opción correcta)`);
+                        return;
+                    }
+                }
+                else {
+                    console.log(`❌ Error en pregunta ${i + 1}: formato no reconocido`);
+                    alert(`Error en pregunta ${i + 1}: debe tener "answers" (formato nuevo) o "options" + "answer" (formato viejo)`);
                     return;
                 }
             }
@@ -466,12 +503,29 @@ function handleJsonFileImport(event) {
                 id: Date.now().toString(),
                 title: quizData.name || 'Cuestionario Importado',
                 description: quizData.description || '',
-                timeLimit: quizData.timeLimit || 30,
-                questions: quizData.questions.map(q => ({
-                    text: q.question,
-                    options: q.options,
-                    correctAnswer: q.answer
-                })),
+                timeLimit: quizData.timePerQuestion || quizData.timeLimit || 30,
+                questions: quizData.questions.map(q => {
+                    // Formato nuevo: "answers" con objetos {text, correct}
+                    if (q.answers && Array.isArray(q.answers)) {
+                        const options = q.answers.map(a => a.text);
+                        const correctAnswer = q.answers.findIndex(a => a.correct === true);
+                        return {
+                            text: q.question,
+                            options: options,
+                            correctAnswer: correctAnswer,
+                            justification: q.justification || ''
+                        };
+                    }
+                    // Formato viejo: "options" + "answer"
+                    else {
+                        return {
+                            text: q.question,
+                            options: q.options,
+                            correctAnswer: q.answer,
+                            justification: q.justification || ''
+                        };
+                    }
+                }),
                 createdAt: new Date().toISOString()
             };
             

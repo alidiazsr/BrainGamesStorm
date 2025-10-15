@@ -1,6 +1,6 @@
 {
   "name": "Cuestionario de Introducción a Node.js",
-  "timePerQuestion": 20,
+  "timePerQuestion": 30,
   "questions": [
     {
       "question": "¿Qué es una ruta absoluta?",
