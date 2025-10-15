@@ -285,8 +285,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const gameCode = urlParams.get('gameCode');
     const quizData = urlParams.get('quizData');
+    const gameFile = urlParams.get('gameFile');
+    const fromFile = urlParams.get('fromFile');
     
-    if (gameCode && quizData) {
+    if (gameFile && !fromFile) {
+        // Redirigir al sistema de carga de archivos
+        window.location.href = 'index.html?gameFile=' + gameFile;
+        return;
+    }
+    
+    if (fromFile && window.currentGameData) {
+        // Datos cargados desde archivo
+        const gameData = window.currentGameData;
+        document.getElementById('gameCodeInput').value = gameData.gameCode;
+        document.getElementById('gameCodeInput').style.display = 'none';
+        document.querySelector('label[for="gameCodeInput"]').style.display = 'none';
+        
+        // Mostrar mensaje informativo
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = 'background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;';
+        infoDiv.innerHTML = '<strong><i class="fas fa-file-alt" style="color: #2196f3;"></i> Cargado desde archivo: ' + gameData.gameCode + '</strong><br><small>Cuestionario: ' + gameData.quiz.title + '</small>';
+        
+        const form = document.getElementById('joinForm');
+        form.insertBefore(infoDiv, form.firstChild);
+        
+        // Enfocar en el nombre
+        document.getElementById('playerName').focus();
+        
+    } else if (gameCode && quizData) {
         // Nuevo sistema autónomo - pre-llenar código y ocultar campo
         document.getElementById('gameCodeInput').value = gameCode;
         document.getElementById('gameCodeInput').style.display = 'none';
@@ -378,8 +404,48 @@ function joinGame(gameCode, playerName) {
         // Verificar si es el nuevo sistema autónomo
         const urlParams = new URLSearchParams(window.location.search);
         const quizData = urlParams.get('quizData');
+        const fromFile = urlParams.get('fromFile');
         
-        if (quizData) {
+        if (fromFile && window.currentGameData) {
+            // Juego cargado desde archivo
+            const gameData = window.currentGameData;
+            
+            // Crear jugador
+            const playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // Simular agregar jugador (para juegos de archivo no hay servidor)
+            if (!gameData.players) {
+                gameData.players = {};
+            }
+            
+            gameData.players[playerId] = {
+                id: playerId,
+                name: playerName,
+                avatar: getPlayerAvatar(),
+                score: 0,
+                answers: [],
+                joinedAt: new Date().toISOString()
+            };
+            
+            // Guardar datos del jugador
+            currentGameCode = gameCode;
+            currentPlayerId = playerId;
+            currentPlayerName = playerName;
+            currentQuiz = gameData.quiz;
+            
+            // Cambiar a pantalla de espera
+            showScreen('waitingScreen');
+            updateWaitingScreen();
+            
+            // Mostrar mensaje de éxito
+            soundSystem.playWelcome();
+            
+            // Auto-iniciar el juego después de unos segundos (simulando que el profesor inicia)
+            setTimeout(() => {
+                startQuizFromFile();
+            }, 3000);
+            
+        } else if (quizData) {
             // Nuevo sistema autónomo
             const game = joinStandaloneGame();
             if (!game) {
@@ -420,10 +486,10 @@ function joinGame(gameCode, playerName) {
             // Guardar datos del jugador
             currentGameCode = gameCode;
             currentPlayerId = playerId;
-        currentPlayerName = playerName;
-        currentQuiz = game.quiz;
-        playerScore = 0;
-        playerAnswers = [];
+            currentPlayerName = playerName;
+            currentQuiz = game.quiz;
+            playerScore = 0;
+            playerAnswers = [];
         
         // Actualizar UI
         document.getElementById('currentGameCode').textContent = gameCode;
@@ -1325,4 +1391,25 @@ function closeJoinError() {
     if (errorModal) {
         errorModal.style.display = 'none';
     }
+}
+
+// ====== FUNCIONES PARA JUEGOS DESDE ARCHIVO ======
+
+function startQuizFromFile() {
+    if (!window.currentGameData || !currentQuiz) {
+        console.error('No hay datos de juego disponibles');
+        return;
+    }
+    
+    // Simular inicio del quiz
+    currentQuestionIndex = 0;
+    playerScore = 0;
+    playerAnswers = [];
+    
+    // Cambiar a pantalla de pregunta
+    showScreen('questionScreen');
+    displayQuestion();
+    
+    // Reproducir sonido de inicio
+    soundSystem.playGameStart();
 }

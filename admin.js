@@ -340,35 +340,14 @@ function startQuiz(quizId) {
     }
     
     // Confirmar inicio del quiz
-    if (!confirm('¿Iniciar el cuestionario "' + quiz.title + '"?\n\n' + quiz.questions.length + ' preguntas • ' + (quiz.timeLimit || 30) + 's por pregunta\n\nSe generará un enlace para que los estudiantes se unan.')) {
+    if (!confirm('¿Iniciar el cuestionario "' + quiz.title + '"?\n\n' + quiz.questions.length + ' preguntas • ' + (quiz.timeLimit || 30) + 's por pregunta\n\nSe generará un archivo que funciona desde cualquier dispositivo.')) {
         return;
     }
     
     try {
-        // Usar el nuevo sistema autónomo
-        if (typeof startQuizWithStandaloneURL === 'function') {
-            startQuizWithStandaloneURL(quizId);
-        } else {
-            // Fallback al sistema antiguo si no está disponible
-            startQuizOldSystem(quizId);
-        }
+        // Usar el nuevo sistema de archivos para múltiples dispositivos
+        createStaticGameFile(quizId);
         
-        // Abrir ventana de control del administrador
-        const controlWindow = window.open(
-            'admin-control.html?code=' + gameCode, 
-            'QuizControl', 
-            'width=1200,height=800,scrollbars=yes,resizable=yes'
-        );
-        
-        if (!controlWindow) {
-            alert('No se pudo abrir la ventana de control. Verifica que no esté bloqueado por el navegador.');
-            return;
-        }
-        
-        // Mostrar información del juego
-        alert('Juego iniciado exitosamente!');
-
-    
     } catch (error) {
         console.error('Error al iniciar quiz:', error);
         alert('Error al iniciar el cuestionario: ' + error.message);
