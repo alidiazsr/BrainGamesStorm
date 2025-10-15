@@ -267,13 +267,42 @@ function listenToGameChanges(gameCode, callback) {
 
 // ====== INTEGRACIÓN CON ADMIN PANEL ======
 
+function createStatusDiv() {
+    // Crear div de estado si no existe
+    let statusDiv = document.getElementById('game-status');
+    if (!statusDiv) {
+        statusDiv = document.createElement('div');
+        statusDiv.id = 'game-status';
+        statusDiv.style.cssText = 'margin: 20px 0; padding: 15px; border-radius: 8px; background: #f8f9fa;';
+        
+        // Buscar un lugar para insertarlo
+        const quizList = document.getElementById('quizList');
+        const adminPanel = document.querySelector('.admin-panel');
+        
+        if (quizList && quizList.parentNode) {
+            quizList.parentNode.insertBefore(statusDiv, quizList);
+        } else if (adminPanel) {
+            adminPanel.appendChild(statusDiv);
+        } else {
+            document.body.appendChild(statusDiv);
+        }
+    }
+    return statusDiv;
+}
+
 function startQuizWithFirebase(quizId) {
+    console.log('🔥 startQuizWithFirebase iniciado para quiz:', quizId);
+    
     // Mostrar mensaje de carga
     const statusDiv = document.getElementById('game-status') || createStatusDiv();
     statusDiv.innerHTML = '<p style="color: #0066cc;"><i class="fas fa-spinner fa-spin"></i> Creando juego en la nube...</p>';
     
+    console.log('📝 Mensaje de carga mostrado');
+    
     createFirebaseGame(quizId)
         .then(gameData => {
+            console.log('✅ Juego Firebase creado:', gameData);
+            
             if (!gameData) {
                 throw new Error('No se pudo crear el juego');
             }
