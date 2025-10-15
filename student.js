@@ -375,7 +375,7 @@ function showScreen(screenId) {
 
 // ====== UNIRSE AL JUEGO ======
 
-function handleJoinGame(e) {
+async function handleJoinGame(e) {
     e.preventDefault();
     
     const gameCode = document.getElementById('gameCodeInput').value.trim().toUpperCase();
@@ -396,11 +396,13 @@ function handleJoinGame(e) {
         return;
     }
     
-    joinGame(gameCode, playerName);
+    await joinGame(gameCode, playerName);
 }
 
-function joinGame(gameCode, playerName) {
+async function joinGame(gameCode, playerName) {
     try {
+        console.log('🔍 Intentando unirse al juego:', gameCode, 'con jugador:', playerName);
+        
         // Verificar si es el nuevo sistema autónomo
         const urlParams = new URLSearchParams(window.location.search);
         const quizData = urlParams.get('quizData');
@@ -473,15 +475,19 @@ function joinGame(gameCode, playerName) {
             soundSystem.playWelcome();
             
         } else {
-            // Sistema antiguo
-            const game = getActiveGame(gameCode);
+            // Sistema antiguo/Firebase - ahora es asíncrono
+            console.log('🔍 Buscando juego activo...');
+            const game = await getActiveGame(gameCode);
             if (!game) {
+                console.log('❌ Juego no encontrado:', gameCode);
                 alert('Código de juego inválido o el juego no está activo');
                 return;
             }
             
+            console.log('✅ Juego encontrado:', game);
+            
             // Agregar jugador al juego (incluyendo avatar)
-            const playerId = addPlayerToGame(gameCode, playerName, getPlayerAvatar());
+            const playerId = await addPlayerToGame(gameCode, playerName, getPlayerAvatar());
             
             // Guardar datos del jugador
             currentGameCode = gameCode;
@@ -497,7 +503,7 @@ function joinGame(gameCode, playerName) {
         document.getElementById('gameInfo').style.display = 'flex';
         
         // Mostrar información del quiz
-        updateQuizInfo();
+        await updateQuizInfo();
         
         // Configurar listener para actualizaciones del juego
         setupGameUpdateListener();
@@ -508,7 +514,7 @@ function joinGame(gameCode, playerName) {
             document.getElementById('gameInfo').style.display = 'flex';
             
             // Mostrar información del quiz
-            updateQuizInfo();
+            await updateQuizInfo();
             
             // Mostrar pantalla de espera
             showScreen('waitingScreen');
@@ -525,11 +531,11 @@ function joinGame(gameCode, playerName) {
     }
 }
 
-function updateQuizInfo() {
+async function updateQuizInfo() {
     const quizInfo = document.getElementById('quizInfo');
     if (currentQuiz && quizInfo) {
         // Obtener estado actual del juego
-        const game = getActiveGame(currentGameCode);
+        const game = await getActiveGame(currentGameCode);
         const gameStatus = game ? game.status : 'waiting';
         
         let statusBadge = '';
@@ -573,26 +579,52 @@ function updateQuizInfo() {
 
 function setupGameUpdateListener() {
     if (gameUpdateListener) {
-        gameUpdateListener(); // Limpiar listener anterior
+        // Limpiar listener anterior de Firebase
+        if (typeof gameUpdateListener === 'object' && gameUpdateListener.off) {
+            gameUpdateListener.off();
+        } else if (typeof gameUpdateListener === 'function') {
+            gameUpdateListener(); // Función de limpieza antigua
+        }
     }
     
-    gameUpdateListener = listenForGameUpdates(currentGameCode, handleGameUpdate);
+    // Intentar configurar listener de Firebase primero
+    if (typeof listenToFirebaseGameChanges === 'function') {
+        console.log('👂 Configurando listener Firebase para:', currentGameCode);
+        gameUpdateListener = listenToFirebaseGameChanges(currentGameCode, (gameData) => {
+            console.log('🔄 Cambio detectado en Firebase:', gameData);
+            
+            // Verificar si el juego ha iniciado
+            if (gameData.status === 'active' && window.location.hash !== '#question') {
+                console.log('🚀 Firebase detectó inicio de juego');
+                handleGameUpdate({ type: 'game_started' });
+            }
+            
+            // Verificar cambios de pregunta
+            if (gameData.currentQuestion !== undefined && gameData.currentQuestion !== currentQuestionIndex) {
+                console.log('❓ Firebase detectó nueva pregunta:', gameData.currentQuestion);
+                handleGameUpdate({ 
+                    type: 'next_question', 
+                    data: { questionIndex: gameData.currentQuestion } 
+                });
+            }
+        });
+    }
     
-    // Agregar polling como respaldo cada 2 segundos
+    // Mantener polling como respaldo cada 5 segundos (menos frecuente con Firebase)
     if (window.gamePollingInterval) {
         clearInterval(window.gamePollingInterval);
     }
     
-    window.gamePollingInterval = setInterval(() => {
+    window.gamePollingInterval = setInterval(async () => {
         if (currentGameCode) {
-            const game = getActiveGame(currentGameCode);
+            const game = await getActiveGame(currentGameCode);
             if (game) {
                 // Verificar si hay cambios de fase
-                if (game.phase === 'question' && window.location.hash !== '#question') {
-                    console.log('Polling detectó inicio de pregunta');
+                if (game.status === 'active' && window.location.hash !== '#question') {
+                    console.log('📡 Polling detectó inicio de juego');
                     handleGameUpdate({ type: 'game_started' });
                 } else if (game.currentQuestion !== undefined && game.currentQuestion !== currentQuestionIndex) {
-                    console.log('Polling detectó nueva pregunta:', game.currentQuestion);
+                    console.log('📡 Polling detectó nueva pregunta:', game.currentQuestion);
                     handleGameUpdate({ 
                         type: 'next_question', 
                         data: { questionIndex: game.currentQuestion } 
@@ -600,7 +632,7 @@ function setupGameUpdateListener() {
                 }
             }
         }
-    }, 2000);
+    }, 5000);
 }
 
 function handleGameUpdate(update) {
@@ -1413,3 +1445,17 @@ function startQuizFromFile() {
     // Reproducir sonido de inicio
     soundSystem.playGameStart();
 }
+
+// ====== INICIALIZACIÓN ======
+
+// Inicializar Firebase cuando se carga la página
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('📱 Página de estudiante cargada');
+    
+    // Intentar inicializar Firebase para estudiantes
+    if (typeof initializeFirebaseForStudents === 'function') {
+        await initializeFirebaseForStudents();
+    }
+    
+    console.log('✅ Inicialización completa');
+});

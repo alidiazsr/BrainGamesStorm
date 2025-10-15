@@ -212,19 +212,35 @@ function createActiveGame(quizId, gameCode) {
 }
 
 // Obtener juego activo
-function getActiveGame(gameCode) {
+async function getActiveGame(gameCode) {
     try {
-        // Primero verificar en el nuevo sistema QR
+        console.log('🔍 Buscando juego activo:', gameCode);
+        
+        // Primero verificar en Firebase
+        const firebaseGame = await getFirebaseGame(gameCode);
+        if (firebaseGame) {
+            console.log('✅ Juego encontrado en Firebase:', gameCode);
+            return firebaseGame;
+        }
+        
+        // Si no está en Firebase, verificar en el nuevo sistema QR
         const qrGameData = localStorage.getItem('game_' + gameCode);
         if (qrGameData) {
+            console.log('✅ Juego encontrado en sistema QR:', gameCode);
             return JSON.parse(qrGameData);
         }
         
         // Si no está en QR, verificar en el sistema antiguo
         const activeGames = JSON.parse(localStorage.getItem('activeGames') || '{}');
-        return activeGames[gameCode] || null;
+        if (activeGames[gameCode]) {
+            console.log('✅ Juego encontrado en sistema antiguo:', gameCode);
+            return activeGames[gameCode];
+        }
+        
+        console.log('❌ Juego no encontrado en ningún sistema:', gameCode);
+        return null;
     } catch (error) {
-        console.error('Error obteniendo juego activo:', error);
+        console.error('❌ Error obteniendo juego activo:', error);
         return null;
     }
 }
@@ -255,12 +271,16 @@ function updateActiveGame(gameCode, gameData) {
 }
 
 // Agregar jugador al juego
-function addPlayerToGame(gameCode, playerName, avatar = '😎') {
+async function addPlayerToGame(gameCode, playerName, avatar = '😎') {
     try {
-        const game = getActiveGame(gameCode);
+        console.log('🔍 Agregando jugador al juego:', gameCode, playerName);
+        
+        const game = await getActiveGame(gameCode);
         if (!game) {
             throw new Error('Juego no encontrado');
         }
+        
+        console.log('✅ Juego encontrado, estado:', game.status);
         
         // Verificar el estado del juego
         if (game.status === 'active') {
@@ -290,7 +310,7 @@ function addPlayerToGame(gameCode, playerName, avatar = '😎') {
             throw new Error('Ya existe un jugador con ese nombre');
         }
         
-        game.players[playerId] = {
+        const newPlayer = {
             id: playerId,
             name: playerName,
             avatar: avatar,
@@ -299,7 +319,23 @@ function addPlayerToGame(gameCode, playerName, avatar = '😎') {
             joinedAt: new Date().toISOString()
         };
         
-        updateActiveGame(gameCode, game);
+        game.players[playerId] = newPlayer;
+        
+        // Si es un juego de Firebase, actualizar en Firebase
+        if (firebaseDatabase) {
+            try {
+                await firebaseDatabase.ref(`games/${gameCode}/players/${playerId}`).set(newPlayer);
+                console.log('✅ Jugador agregado a Firebase:', playerId);
+            } catch (error) {
+                console.error('❌ Error agregando jugador a Firebase:', error);
+                // Continuar con localStorage como fallback
+                updateActiveGame(gameCode, game);
+            }
+        } else {
+            // Fallback a localStorage
+            updateActiveGame(gameCode, game);
+        }
+        
         return playerId;
     } catch (error) {
         console.error('Error agregando jugador:', error);
@@ -485,4 +521,117 @@ function createSampleData() {
 // Crear datos de ejemplo al cargar la página
 if (typeof window !== 'undefined') {
     createSampleData();
+}
+
+// ====== CONFIGURACIÓN FIREBASE PARA ESTUDIANTES ======
+
+// Configuración Firebase - La misma que en firebase-game-system.js
+const firebaseConfig = {
+    apiKey: "AIzaSyDLIQ_kPXmplHgaJvvtVDgSpTxVoAgisjA",
+    authDomain: "braingamesstorm.firebaseapp.com",
+    databaseURL: "https://braingamesstorm-default-rtdb.firebaseio.com",
+    projectId: "braingamesstorm",
+    storageBucket: "braingamesstorm.firebasestorage.app",
+    messagingSenderId: "426491473230",
+    appId: "1:426491473230:web:c3ac2d5cf1f74afb47e7c1"
+};
+
+// Variable para Firebase
+let firebaseApp = null;
+let firebaseDatabase = null;
+
+// Inicializar Firebase para estudiantes
+async function initializeFirebaseForStudents() {
+    try {
+        console.log('🔥 Inicializando Firebase para estudiantes...');
+        
+        // Cargar Firebase SDK dinámicamente
+        if (!window.firebase) {
+            console.log('📦 Cargando Firebase SDK...');
+            await loadScript('https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js');
+            await loadScript('https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js');
+        }
+
+        // Inicializar Firebase
+        if (!firebaseApp) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseDatabase = firebase.database();
+            console.log('✅ Firebase inicializado para estudiantes');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Error inicializando Firebase para estudiantes:', error);
+        return false;
+    }
+}
+
+// Función auxiliar para cargar scripts
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// Función para obtener juego de Firebase
+async function getFirebaseGame(gameCode) {
+    try {
+        console.log('🔍 Buscando juego en Firebase:', gameCode);
+        
+        if (!firebaseDatabase) {
+            const initialized = await initializeFirebaseForStudents();
+            if (!initialized) {
+                console.log('❌ No se pudo inicializar Firebase');
+                return null;
+            }
+        }
+
+        const snapshot = await firebaseDatabase.ref(`games/${gameCode}`).once('value');
+        const gameData = snapshot.val();
+        
+        if (gameData) {
+            console.log('✅ Juego encontrado en Firebase:', gameCode);
+            return gameData;
+        } else {
+            console.log('❌ Juego no encontrado en Firebase:', gameCode);
+            return null;
+        }
+    } catch (error) {
+        console.error('❌ Error obteniendo juego de Firebase:', error);
+        return null;
+    }
+}
+
+// Función para escuchar cambios del juego en Firebase
+function listenToFirebaseGameChanges(gameCode, callback) {
+    try {
+        if (!firebaseDatabase) {
+            console.log('❌ Firebase no inicializado para escuchar cambios');
+            return null;
+        }
+        
+        console.log('👂 Escuchando cambios en Firebase para:', gameCode);
+        
+        const gameRef = firebaseDatabase.ref(`games/${gameCode}`);
+        gameRef.on('value', (snapshot) => {
+            const gameData = snapshot.val();
+            if (gameData && callback) {
+                callback(gameData);
+            }
+        });
+        
+        return gameRef;
+    } catch (error) {
+        console.error('❌ Error configurando listener Firebase:', error);
+        return null;
+    }
 }
