@@ -244,7 +244,7 @@ function updateQuestionNumbers() {
     const questions = document.querySelectorAll('.question-item');
     questions.forEach((question, index) => {
         const numberSpan = question.querySelector('.question-number');
-        numberSpan.textContent = `Pregunta ${index + 1}`;
+        numberSpan.textContent = 'Pregunta ' + (index + 1);
     });
 }
 
@@ -316,7 +316,7 @@ function deleteQuizConfirm(quizId) {
         return;
     }
     
-    if (confirm(`¿Estás seguro de que quieres eliminar "${quiz.title}"?\n\nEsta acción no se puede deshacer.`)) {
+    if (confirm('¿Estás seguro de que quieres eliminar "' + quiz.title + '"?\n\nEsta acción no se puede deshacer.')) {
         if (deleteQuiz(quizId)) {
             loadQuizList();
             alert('Cuestionario eliminado correctamente');
@@ -340,7 +340,7 @@ function startQuiz(quizId) {
     }
     
     // Confirmar inicio del quiz
-    if (!confirm(`¿Iniciar el cuestionario "${quiz.title}"?\n\n${quiz.questions.length} preguntas • ${quiz.timeLimit || 30}s por pregunta\n\nSe generará un enlace para que los estudiantes se unan.`)) {
+    if (!confirm('¿Iniciar el cuestionario "' + quiz.title + '"?\n\n' + quiz.questions.length + ' preguntas • ' + (quiz.timeLimit || 30) + 's por pregunta\n\nSe generará un enlace para que los estudiantes se unan.')) {
         return;
     }
     
@@ -355,7 +355,7 @@ function startQuiz(quizId) {
         
         // Abrir ventana de control del administrador
         const controlWindow = window.open(
-            `admin-control.html?code=${gameCode}`, 
+            'admin-control.html?code=' + gameCode, 
             'QuizControl', 
             'width=1200,height=800,scrollbars=yes,resizable=yes'
         );
@@ -366,7 +366,7 @@ function startQuiz(quizId) {
         }
         
         // Mostrar información del juego
-        alert(`🎮 Juego iniciado exitosamente!
+        alert('Juego iniciado exitosamente!');
 
     
     } catch (error) {
@@ -562,10 +562,7 @@ function handleJsonFileImport(event) {
             
             // Mostrar detalles de lo importado
             const questionSummary = quiz.questions.map((q, i) => (i + 1) + '. ' + q.text).join('\n');
-            alert('Cuestionario importado exitosamente!\n\nTítulo: ' + quiz.title + '\nDescripción: ' + (quiz.description || 'Sin descripción') + '\nTiempo límite: ' + quiz.timeLimit + ' segundos\nPreguntas importadas: ' + quiz.questions.length);
-
-Preguntas:
-${questionSummary}`);
+            alert('Cuestionario importado exitosamente!\n\nTítulo: ' + quiz.title + '\nDescripción: ' + (quiz.description || 'Sin descripción') + '\nTiempo límite: ' + quiz.timeLimit + ' segundos\nPreguntas importadas: ' + quiz.questions.length + '\n\nPreguntas:\n' + questionSummary);
             
         } catch (error) {
             alert('Error al procesar el archivo JSON: ' + error.message);
@@ -587,7 +584,7 @@ function escapeHtml(text) {
 function generateFileName(title) {
     const cleanTitle = title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
     const timestamp = new Date().toISOString().slice(0, 10);
-    return `${cleanTitle}_${timestamp}.json`;
+    return cleanTitle + '_' + timestamp + '.json';
 }
 
 function downloadJsonFile(data, filename) {
