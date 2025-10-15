@@ -4,8 +4,19 @@
 // ====== SISTEMA DE ARCHIVOS ESTÁTICOS ======
 
 function createStaticGameFile(quizId) {
+    console.log('📁 createStaticGameFile iniciada con quizId:', quizId);
+    
     try {
+        console.log('🔍 Verificando función getQuizById...');
+        if (typeof getQuizById !== 'function') {
+            console.error('❌ getQuizById no está disponible en file-game-system');
+            alert('Error: getQuizById no está disponible');
+            return;
+        }
+        
         const quiz = getQuizById(quizId);
+        console.log('📋 Quiz obtenido:', quiz ? quiz.title : 'null');
+        
         if (!quiz) {
             alert('Cuestionario no encontrado');
             return;
@@ -14,6 +25,8 @@ function createStaticGameFile(quizId) {
         // Generar código único
         const gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
         const timestamp = Date.now();
+        
+        console.log('🎲 Código generado:', gameCode);
         
         // Crear datos del juego
         const gameData = {
@@ -26,21 +39,29 @@ function createStaticGameFile(quizId) {
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 horas
         };
         
+        console.log('💾 Datos del juego creados');
+        
         // Crear archivo JSON descargable
         const jsonContent = JSON.stringify(gameData, null, 2);
         const blob = new Blob([jsonContent], { type: 'application/json' });
         const fileName = 'game_' + gameCode + '.json';
+        
+        console.log('📄 Archivo JSON creado:', fileName);
         
         // Crear enlace de descarga
         const downloadLink = document.createElement('a');
         downloadLink.href = URL.createObjectURL(blob);
         downloadLink.download = fileName;
         
+        console.log('🔗 Enlace de descarga creado');
+        
         // Mostrar instrucciones detalladas
         showStaticGameInstructions(gameCode, quiz.title, downloadLink, jsonContent);
         
+        console.log('✅ createStaticGameFile completada exitosamente');
+        
     } catch (error) {
-        console.error('Error al crear juego:', error);
+        console.error('❌ Error en createStaticGameFile:', error);
         alert('Error al crear el juego: ' + error.message);
     }
 }

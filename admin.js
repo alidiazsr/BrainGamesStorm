@@ -7,6 +7,13 @@ let questionCount = 0;
 // ====== INICIALIZACIÓN ======
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Admin panel cargando...');
+    
+    // Debug del sistema
+    setTimeout(() => {
+        debugSystemStatus();
+    }, 1000);
+    
     // Verificar que las funciones principales de script.js estén disponibles
     if (typeof getAllQuizzes !== 'function' || typeof getQuizById !== 'function' || 
         typeof saveQuiz !== 'function' || typeof deleteQuiz !== 'function') {
@@ -15,6 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
+    console.log('✅ Funciones básicas de script.js disponibles');
+    
     loadQuizList();
     
     // Event listener solo para el input de archivo
@@ -22,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (jsonFileInput) {
         jsonFileInput.addEventListener('change', handleJsonFileImport);
     }
+    
+    console.log('✅ Admin panel cargado completamente');
 });
 
 // ====== CARGA DE CUESTIONARIOS ======
@@ -63,7 +74,7 @@ function loadQuizList() {
                 ${quiz.description ? `<p class="quiz-description">${escapeHtml(quiz.description)}</p>` : ''}
             </div>
             <div class="quiz-actions">
-                <button class="btn btn-primary" onclick="startQuiz('${quiz.id}')">
+                <button class="btn btn-primary" onclick="console.log('🔴 Botón Iniciar clickeado para quiz:', '${quiz.id}'); startQuiz('${quiz.id}')">
                     <i class="fas fa-play"></i>
                     Iniciar
                 </button>
@@ -248,6 +259,29 @@ function updateQuestionNumbers() {
     });
 }
 
+// ====== DEBUG Y VERIFICACIÓN ======
+
+function debugSystemStatus() {
+    console.log('🔍 === ESTADO DEL SISTEMA ===');
+    console.log('script.js funciones:');
+    console.log('- getQuizById:', typeof getQuizById);
+    console.log('- getAllQuizzes:', typeof getAllQuizzes);
+    
+    console.log('Firebase:');
+    console.log('- firebase global:', typeof firebase);
+    console.log('- window.firebaseConfigured:', window.firebaseConfigured);
+    console.log('- initializeFirebase:', typeof initializeFirebase);
+    console.log('- startQuizWithFirebase:', typeof startQuizWithFirebase);
+    
+    console.log('File system:');
+    console.log('- createStaticGameFile:', typeof createStaticGameFile);
+    
+    console.log('Admin funciones:');
+    console.log('- startQuiz:', typeof startQuiz);
+    console.log('- loadQuizList:', typeof loadQuizList);
+    console.log('========================');
+}
+
 // ====== GESTIÓN DE CUESTIONARIOS ======
 
 function duplicateQuiz(quizId) {
@@ -327,46 +361,71 @@ function deleteQuizConfirm(quizId) {
 }
 
 function startQuiz(quizId) {
+    console.log('🔍 startQuiz llamada con quizId:', quizId);
+    
     // Verificar que las funciones de script.js estén disponibles
     if (typeof getQuizById !== 'function') {
+        console.error('❌ getQuizById no está disponible');
         alert('Error: Las funciones del sistema no están disponibles. Recarga la página.');
         return;
     }
     
     const quiz = getQuizById(quizId);
     if (!quiz) {
+        console.error('❌ Quiz no encontrado para ID:', quizId);
         alert('Cuestionario no encontrado');
         return;
     }
+    
+    console.log('✅ Quiz encontrado:', quiz.title);
+    console.log('🔍 Verificando estado Firebase...');
+    console.log('- window.firebaseConfigured:', window.firebaseConfigured);
+    console.log('- typeof startQuizWithFirebase:', typeof startQuizWithFirebase);
+    console.log('- typeof firebase:', typeof firebase);
     
     // Verificar si Firebase está listo
     if (window.firebaseConfigured && typeof startQuizWithFirebase === 'function') {
         // Usar Firebase (FUNCIONA DESDE CUALQUIER DISPOSITIVO)
         console.log('🔥 Usando Firebase para múltiples dispositivos');
-        startQuizWithFirebase(quizId);
-        return;
+        try {
+            startQuizWithFirebase(quizId);
+            return;
+        } catch (error) {
+            console.error('❌ Error con Firebase:', error);
+            alert('Error con Firebase: ' + error.message + '\nUsando sistema de archivos como respaldo.');
+        }
     }
     
     // Si Firebase no está listo, intentar inicializarlo
     if (typeof initializeFirebase === 'function') {
         console.log('🔄 Intentando inicializar Firebase...');
-        setTimeout(() => {
-            if (window.firebaseConfigured) {
-                startQuizWithFirebase(quizId);
-            } else {
-                // Fallback al sistema de archivos
-                console.log('⚠️ Firebase no disponible, usando sistema de archivos');
-                useFileSystemWithWarning(quizId, quiz);
-            }
-        }, 2000);
-        return;
+        const firebaseReady = initializeFirebase();
+        if (firebaseReady) {
+            console.log('✅ Firebase inicializado, reintentando...');
+            setTimeout(() => {
+                if (window.firebaseConfigured && typeof startQuizWithFirebase === 'function') {
+                    startQuizWithFirebase(quizId);
+                } else {
+                    console.log('⚠️ Firebase aún no listo, usando sistema de archivos');
+                    useFileSystemWithWarning(quizId, quiz);
+                }
+            }, 1000);
+            return;
+        } else {
+            console.log('❌ No se pudo inicializar Firebase');
+        }
+    } else {
+        console.log('❌ initializeFirebase no está disponible');
     }
     
     // Fallback final
+    console.log('📁 Usando sistema de archivos como fallback');
     useFileSystemWithWarning(quizId, quiz);
 }
 
 function useFileSystemWithWarning(quizId, quiz) {
+    console.log('⚠️ Mostrando advertencia de sistema limitado');
+    
     // Confirmar con advertencia
     if (!confirm('⚠️ ADVERTENCIA: Sistema Firebase no disponible\n\n' + 
                  'El cuestionario "' + quiz.title + '" se iniciará con el sistema de archivos.\n\n' +
@@ -377,11 +436,17 @@ function useFileSystemWithWarning(quizId, quiz) {
     }
     
     try {
-        // Usar el sistema de archivos como fallback
-        createStaticGameFile(quizId);
+        console.log('📁 Iniciando con sistema de archivos...');
+        // Verificar si la función existe
+        if (typeof createStaticGameFile === 'function') {
+            createStaticGameFile(quizId);
+        } else {
+            console.error('❌ createStaticGameFile no está disponible');
+            alert('Error: Sistema de archivos no disponible. Recarga la página.');
+        }
         
     } catch (error) {
-        console.error('Error al iniciar quiz:', error);
+        console.error('❌ Error al iniciar quiz:', error);
         alert('Error al iniciar el cuestionario: ' + error.message);
     }
 }
