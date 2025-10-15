@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego - Brain Games Storm</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .game-header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .player-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .avatar-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .avatar-option {
+            width: 60px;
+            height: 60px;
+            border: 3px solid transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .avatar-option:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+        }
+        
+        .avatar-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .join-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .join-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .join-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .waiting-area {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .players-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .player-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .player-avatar {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Loading inicial -->
+        <div id="loadingArea" class="loading">
+            <div class="spinner"></div>
+            <h2>Cargando juego...</h2>
+        </div>
+        
+        <!-- Error si no se puede cargar -->
+        <div id="errorArea" class="error-message" style="display: none;">
+            <h2><i class="fas fa-exclamation-triangle"></i> Error</h2>
+            <p id="errorMessage">No se pudo cargar el juego</p>
+            <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                Volver al inicio
+            </button>
+        </div>
+        
+        <!-- Formulario para unirse al juego -->
+        <div id="joinArea" style="display: none;">
+            <div class="game-header">
+                <h1><i class="fas fa-brain"></i> Brain Games Storm</h1>
+                <h2 id="quizTitle">Cargando...</h2>
+                <p>¡Únete al juego!</p>
+            </div>
+            
+            <div class="player-form">
+                <h3>Elige tu avatar y nombre</h3>
+                
+                <div class="avatar-selector" id="avatarSelector">
+                    <!-- Los avatares se cargarán dinámicamente -->
+                </div>
+                
+                <input type="text" 
+                       id="playerName" 
+                       class="name-input" 
+                       placeholder="Escribe tu nombre..." 
+                       maxlength="20">
+                
+                <button id="joinGameBtn" class="join-btn" onclick="joinCurrentGame()">
+                    <i class="fas fa-play"></i> Unirse al Juego
+                </button>
+            </div>
+        </div>
+        
+        <!-- Área de espera -->
+        <div id="waitingArea" class="waiting-area">
+            <div class="game-header">
+                <h1 id="waitingQuizTitle">Quiz Title</h1>
+                <p>Esperando a que el profesor inicie el juego...</p>
+            </div>
+            
+            <div class="players-list" id="playersList">
+                <!-- Lista de jugadores se cargará dinámicamente -->
+            </div>
+            
+            <p><strong id="playersCount">0</strong> jugadores conectados</p>
+        </div>
+        
+        <!-- Área del juego (se cargará student.html content) -->
+        <div id="gameArea" style="display: none;">
+            <!-- El contenido del juego se cargará aquí -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="url-game-system.js"></script>
+    <script>
+        let currentGame = null;
+        let gameId = null;
+        let playerId = null;
+        
+        // Avatares disponibles
+        const avatars = ['😎', '🤓', '😊', '🥳', '🚀', '⭐', '🎯', '🏆', '🎭', '🎨', '🎪', '🎭', '🦄', '🌟', '💎', '🔥', '⚡', '🌈', '🎵', '🎸'];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGame();
+        });
+        
+        function initializeGame() {
+            try {
+                // Obtener parámetros de la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('quiz');
+                gameId = urlParams.get('game');
+                
+                if (!quizId || !gameId) {
+                    showError('URL de juego inválida');
+                    return;
+                }
+                
+                // Cargar el juego
+                currentGame = joinGameFromURL();
+                if (!currentGame) {
+                    showError('Juego no encontrado o expirado');
+                    return;
+                }
+                
+                // Configurar la interfaz
+                setupGameInterface();
+                
+            } catch (error) {
+                console.error('Error al inicializar:', error);
+                showError('Error al cargar el juego');
+            }
+        }
+        
+        function setupGameInterface() {
+            // Ocultar loading
+            document.getElementById('loadingArea').style.display = 'none';
+            
+            // Mostrar área de unión
+            document.getElementById('joinArea').style.display = 'block';
+            
+            // Configurar título
+            document.getElementById('quizTitle').textContent = currentGame.quiz.title;
+            
+            // Configurar avatares
+            setupAvatars();
+            
+            // Configurar nombre input
+            const nameInput = document.getElementById('playerName');
+            nameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    joinCurrentGame();
+                }
+            });
+            nameInput.focus();
+        }
+        
+        function setupAvatars() {
+            const avatarSelector = document.getElementById('avatarSelector');
+            avatarSelector.innerHTML = '';
+            
+            avatars.forEach((avatar, index) => {
+                const avatarElement = document.createElement('div');
+                avatarElement.className = 'avatar-option';
+                avatarElement.textContent = avatar;
+                avatarElement.onclick = () => selectAvatar(avatarElement, avatar);
+                
+                if (index === 0) {
+                    avatarElement.classList.add('selected');
+                    avatarElement.dataset.selected = 'true';
+                }
+                
+                avatarSelector.appendChild(avatarElement);
+            });
+        }
+        
+        function selectAvatar(element, avatar) {
+            // Quitar selección anterior
+            document.querySelectorAll('.avatar-option').forEach(el => {
+                el.classList.remove('selected');
+                el.dataset.selected = 'false';
+            });
+            
+            // Seleccionar nuevo avatar
+            element.classList.add('selected');
+            element.dataset.selected = 'true';
+        }
+        
+        function getSelectedAvatar() {
+            const selected = document.querySelector('.avatar-option[data-selected="true"]');
+            return selected ? selected.textContent : avatars[0];
+        }
+        
+        function joinCurrentGame() {
+            const playerName = document.getElementById('playerName').value.trim();
+            
+            if (!playerName) {
+                alert('Por favor ingresa tu nombre');
+                return;
+            }
+            
+            if (playerName.length > 20) {
+                alert('El nombre debe tener máximo 20 caracteres');
+                return;
+            }
+            
+            const selectedAvatar = getSelectedAvatar();
+            
+            // Agregar jugador al juego
+            playerId = addPlayerToURL(gameId, playerName, selectedAvatar);
+            
+            if (!playerId) {
+                showError('Error al unirse al juego');
+                return;
+            }
+            
+            // Cambiar a área de espera
+            showWaitingArea();
+            
+            // Iniciar polling para actualizar lista de jugadores
+            startPlayerListUpdate();
+        }
+        
+        function showWaitingArea() {
+            document.getElementById('joinArea').style.display = 'none';
+            document.getElementById('waitingArea').style.display = 'block';
+            document.getElementById('waitingQuizTitle').textContent = currentGame.quiz.title;
+            updatePlayersList();
+        }
+        
+        function updatePlayersList() {
+            // Recargar datos del juego
+            const gameData = localStorage.getItem(`game_${gameId}`);
+            if (!gameData) return;
+            
+            currentGame = JSON.parse(gameData);
+            
+            const playersList = document.getElementById('playersList');
+            const playersCount = document.getElementById('playersCount');
+            
+            playersList.innerHTML = '';
+            playersCount.textContent = currentGame.players.length;
+            
+            currentGame.players.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                playerCard.innerHTML = `
+                    <div class="player-avatar">${player.avatar}</div>
+                    <div class="player-name">${player.name}</div>
+                `;
+                playersList.appendChild(playerCard);
+            });
+        }
+        
+        function startPlayerListUpdate() {
+            // Actualizar lista cada 2 segundos
+            const updateInterval = setInterval(() => {
+                updatePlayersList();
+                
+                // Verificar si el juego ha comenzado
+                const gameData = localStorage.getItem(`game_${gameId}`);
+                if (gameData) {
+                    const game = JSON.parse(gameData);
+                    if (game.status === 'playing') {
+                        clearInterval(updateInterval);
+                        startGame();
+                    }
+                }
+            }, 2000);
+        }
+        
+        function startGame() {
+            // Aquí puedes cargar el contenido del juego real
+            // Por ahora, redirigir a student.html con los parámetros necesarios
+            const gameURL = `student.html?quiz=${currentGame.quiz.id}&game=${gameId}&player=${playerId}`;
+            window.location.href = gameURL;
+        }
+        
+        function showError(message) {
+            document.getElementById('loadingArea').style.display = 'none';
+            document.getElementById('joinArea').style.display = 'none';
+            document.getElementById('waitingArea').style.display = 'none';
+            
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorArea').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

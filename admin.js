@@ -328,9 +328,7 @@ function deleteQuizConfirm(quizId) {
 
 function startQuiz(quizId) {
     // Verificar que las funciones de script.js estén disponibles
-    if (typeof getQuizById !== 'function' || typeof generateGameCode !== 'function' || 
-        typeof getActiveGame !== 'function' || typeof createActiveGame !== 'function' ||
-        typeof updateActiveGame !== 'function') {
+    if (typeof getQuizById !== 'function') {
         alert('Error: Las funciones del sistema no están disponibles. Recarga la página.');
         return;
     }
@@ -342,32 +340,18 @@ function startQuiz(quizId) {
     }
     
     // Confirmar inicio del quiz
-    if (!confirm(`¿Iniciar el cuestionario "${quiz.title}"?\n\n${quiz.questions.length} preguntas • ${quiz.timeLimit || 30}s por pregunta\n\nSe generará un código para que los estudiantes se unan.`)) {
-        return;
-    }
-    
-    // Generar código de juego único
-    let gameCode;
-    let attempts = 0;
-    do {
-        gameCode = generateGameCode();
-        attempts++;
-    } while (getActiveGame(gameCode) && attempts < 10);
-    
-    if (attempts >= 10) {
-        alert('Error generando código de juego. Intenta de nuevo.');
+    if (!confirm(`¿Iniciar el cuestionario "${quiz.title}"?\n\n${quiz.questions.length} preguntas • ${quiz.timeLimit || 30}s por pregunta\n\nSe generará un enlace para que los estudiantes se unan.`)) {
         return;
     }
     
     try {
-        // Crear y activar juego inmediatamente
-        createActiveGame(quizId, gameCode);
-        updateActiveGame(gameCode, { 
-            status: 'waiting', 
-            startTime: new Date().toISOString(),
-            currentQuestion: 0,
-            phase: 'waiting' // waiting, question, results, finished
-        });
+        // Usar el nuevo sistema de URLs
+        if (typeof startQuizWithURL === 'function') {
+            startQuizWithURL(quizId);
+        } else {
+            // Fallback al sistema antiguo si no está disponible
+            startQuizOldSystem(quizId);
+        }
         
         // Abrir ventana de control del administrador
         const controlWindow = window.open(
@@ -384,16 +368,51 @@ function startQuiz(quizId) {
         // Mostrar información del juego
         alert(`🎮 Juego iniciado exitosamente!
 
-📋 Cuestionario: ${quiz.title}
-🔑 Código para estudiantes: ${gameCode}
-👥 Los estudiantes pueden unirse ahora
-🎯 Se ha abierto la ventana de control
-
-Los estudiantes deben ir a la página principal e ingresar el código: ${gameCode}`);
-        
+    
     } catch (error) {
+        console.error('Error al iniciar quiz:', error);
         alert('Error al iniciar el cuestionario: ' + error.message);
     }
+}
+
+function startQuizOldSystem(quizId) {
+    // Sistema antiguo como fallback
+    if (typeof generateGameCode !== 'function' || typeof createActiveGame !== 'function') {
+        alert('Sistema de códigos no disponible');
+        return;
+    }
+    
+    // Generar código de juego único
+    let gameCode;
+    let attempts = 0;
+    do {
+        gameCode = generateGameCode();
+        attempts++;
+    } while (getActiveGame && getActiveGame(gameCode) && attempts < 10);
+    
+    if (attempts >= 10) {
+        alert('Error generando código de juego. Intenta de nuevo.');
+        return;
+    }
+    
+    // Crear y activar juego
+    createActiveGame(quizId, gameCode);
+    
+    if (typeof updateActiveGame === 'function') {
+        updateActiveGame(gameCode, { 
+            status: 'waiting', 
+            startTime: new Date().toISOString(),
+            currentQuestion: 0,
+            phase: 'waiting'
+        });
+    }
+    
+    // Abrir ventana de control
+    const controlUrl = 'teacher.html?code=' + gameCode;
+    window.open(controlUrl, '_blank', 'width=1200,height=800');
+    
+    const quiz = getQuizById(quizId);
+    alert('Cuestionario iniciado exitosamente\n\nCuestionario: ' + quiz.title + '\nCódigo para estudiantes: ' + gameCode + '\nLos estudiantes pueden unirse ahora\nSe ha abierto la ventana de control\n\nLos estudiantes deben ir a la página principal e ingresar el código: ' + gameCode);
 }
 
 // ====== IMPORTACIÓN JSON SIMPLE ======
