@@ -21,56 +21,86 @@ window.firebaseConfigured = false;
 
 function initializeFirebase() {
     try {
+        console.log('🔥 Iniciando inicialización Firebase...');
+        console.log('- typeof firebase:', typeof firebase);
+        console.log('- window.firebase:', typeof window.firebase);
+        
         // Verificar si Firebase ya está cargado
-        if (typeof firebase === 'undefined') {
-            console.log('🔄 Cargando Firebase SDK...');
+        if (typeof firebase === 'undefined' && typeof window.firebase === 'undefined') {
+            console.log('🔄 Firebase SDK no disponible, cargando scripts...');
             loadFirebaseScripts();
             return false;
         }
 
-        // Inicializar Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-            console.log('🔥 Firebase inicializado con proyecto:', firebaseConfig.projectId);
+        // Usar firebase global o window.firebase
+        const firebaseApp = firebase || window.firebase;
+        console.log('🔥 Firebase SDK encontrado:', !!firebaseApp);
+
+        // Inicializar Firebase si no está inicializado
+        if (!firebaseApp.apps || !firebaseApp.apps.length) {
+            console.log('🔧 Inicializando app Firebase...');
+            firebaseApp.initializeApp(firebaseConfig);
+            console.log('✅ Firebase app inicializada');
+        } else {
+            console.log('✅ Firebase app ya existía');
         }
         
         // Obtener referencia a la base de datos
-        db = firebase.database();
+        db = firebaseApp.database();
         isFirebaseInitialized = true;
         window.firebaseConfigured = true;
         
-        console.log('✅ Firebase listo para usar');
+        console.log('✅ Firebase completamente listo');
+        console.log('- db:', !!db);
+        console.log('- isFirebaseInitialized:', isFirebaseInitialized);
+        console.log('- window.firebaseConfigured:', window.firebaseConfigured);
+        
         showFirebaseReadyMessage();
         return true;
         
     } catch (error) {
         console.error('❌ Error al inicializar Firebase:', error);
+        window.firebaseConfigured = false;
         return false;
     }
 }
 
 function loadFirebaseScripts() {
+    console.log('📦 Cargando Firebase SDK...');
+    
+    // Verificar si ya hay scripts Firebase cargándose
+    if (document.querySelector('script[src*="firebase"]')) {
+        console.log('📦 Scripts Firebase ya en proceso de carga');
+        return;
+    }
+    
     // Cargar Firebase SDK si no está presente
     const scripts = [
-        'https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js',
-        'https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js'
+        'https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js',
+        'https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js'
     ];
     
     let loaded = 0;
-    scripts.forEach(src => {
+    const totalScripts = scripts.length;
+    
+    scripts.forEach((src, index) => {
         const script = document.createElement('script');
         script.src = src;
         script.onload = () => {
             loaded++;
-            if (loaded === scripts.length) {
-                console.log('✅ Firebase SDK cargado');
+            console.log(`📦 Script ${index + 1}/${totalScripts} cargado: ${src.split('/').pop()}`);
+            
+            if (loaded === totalScripts) {
+                console.log('✅ Todos los scripts Firebase cargados');
+                // Intentar inicializar después de cargar todos los scripts
                 setTimeout(() => {
-                    initializeFirebase();
+                    console.log('🔄 Reintentando inicialización después de cargar scripts...');
+                    attemptFirebaseInitialization();
                 }, 500);
             }
         };
-        script.onerror = () => {
-            console.error('❌ Error cargando Firebase SDK:', src);
+        script.onerror = (error) => {
+            console.error('❌ Error cargando Firebase SDK:', src, error);
         };
         document.head.appendChild(script);
     });
@@ -492,17 +522,77 @@ function showToast(message) {
     }, 3000);
 }
 
-// ====== AUTO-INICIALIZACIÓN ======
+// ====== AUTO-INICIALIZACIÓN MEJORADA ======
+
+// Función para intentar inicialización múltiples veces
+function attemptFirebaseInitialization() {
+    console.log('🔄 Intentando inicializar Firebase...');
+    
+    const success = initializeFirebase();
+    if (success) {
+        console.log('✅ Firebase inicializado exitosamente');
+        return true;
+    } else {
+        console.log('⏳ Firebase SDK aún no disponible, reintentando...');
+        return false;
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Intentar inicializar Firebase automáticamente
-    console.log('🔄 Iniciando sistema Firebase...');
-    setTimeout(() => {
-        initializeFirebase();
-    }, 1000);
+    console.log('📱 DOM cargado, iniciando sistema Firebase...');
+    
+    // Intentar inmediatamente
+    if (!attemptFirebaseInitialization()) {
+        // Si falla, reintentar cada 500ms hasta 10 veces
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const retryInterval = setInterval(() => {
+            attempts++;
+            console.log(`🔄 Intento ${attempts}/${maxAttempts} de inicializar Firebase`);
+            
+            if (attemptFirebaseInitialization() || attempts >= maxAttempts) {
+                clearInterval(retryInterval);
+                if (attempts >= maxAttempts) {
+                    console.error('❌ No se pudo inicializar Firebase después de múltiples intentos');
+                }
+            }
+        }, 500);
+    }
 });
+
+// También intentar si el script se carga después del DOM
+if (document.readyState !== 'loading') {
+    console.log('📱 DOM ya listo, inicializando Firebase directamente');
+    attemptFirebaseInitialization();
+}
 
 // ====== FUNCIONES PÚBLICAS ======
 
+// Exponer funciones inmediatamente (no esperar a inicialización)
 window.initializeFirebase = initializeFirebase;
 window.startQuizWithFirebase = startQuizWithFirebase;
+window.validateFirebaseConfig = validateFirebaseConfig;
+window.createFirebaseGame = createFirebaseGame;
+window.getFirebaseGame = getFirebaseGame;
+
+// Función para verificar estado Firebase
+window.checkFirebaseStatus = function() {
+    console.log('🔍 Estado Firebase:');
+    console.log('- window.firebaseConfigured:', window.firebaseConfigured);
+    console.log('- typeof firebase:', typeof firebase);
+    console.log('- typeof window.firebase:', typeof window.firebase);
+    console.log('- isFirebaseInitialized:', isFirebaseInitialized);
+    console.log('- db disponible:', !!db);
+    console.log('- startQuizWithFirebase disponible:', typeof window.startQuizWithFirebase);
+    
+    return {
+        configured: window.firebaseConfigured,
+        firebaseAvailable: typeof firebase !== 'undefined' || typeof window.firebase !== 'undefined',
+        initialized: isFirebaseInitialized,
+        dbReady: !!db,
+        functionsExposed: typeof window.startQuizWithFirebase === 'function'
+    };
+};
+
+console.log('📝 Funciones Firebase expuestas globalmente');

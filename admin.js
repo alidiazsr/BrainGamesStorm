@@ -379,11 +379,30 @@ function startQuiz(quizId) {
     
     console.log('✅ Quiz encontrado:', quiz.title);
     console.log('🔍 Verificando estado Firebase...');
-    console.log('- window.firebaseConfigured:', window.firebaseConfigured);
-    console.log('- typeof startQuizWithFirebase:', typeof startQuizWithFirebase);
-    console.log('- typeof firebase:', typeof firebase);
     
-    // Verificar si Firebase está listo
+    // Verificar estado completo de Firebase
+    if (typeof window.checkFirebaseStatus === 'function') {
+        const status = window.checkFirebaseStatus();
+        console.log('📊 Estado detallado Firebase:', status);
+    } else {
+        console.log('- window.firebaseConfigured:', window.firebaseConfigured);
+        console.log('- typeof startQuizWithFirebase:', typeof startQuizWithFirebase);
+        console.log('- typeof firebase:', typeof firebase);
+        console.log('- typeof window.firebase:', typeof window.firebase);
+    }
+    
+    // Intentar inicializar Firebase si no está configurado
+    if (!window.firebaseConfigured && typeof window.initializeFirebase === 'function') {
+        console.log('🔄 Intentando inicializar Firebase...');
+        const initialized = window.initializeFirebase();
+        if (initialized) {
+            console.log('✅ Firebase inicializado exitosamente');
+        } else {
+            console.log('⏳ Firebase aún no disponible');
+        }
+    }
+    
+    // Verificar si Firebase está listo después del intento de inicialización
     if (window.firebaseConfigured && typeof startQuizWithFirebase === 'function') {
         // Usar Firebase (FUNCIONA DESDE CUALQUIER DISPOSITIVO)
         console.log('🔥 Usando Firebase para múltiples dispositivos');
