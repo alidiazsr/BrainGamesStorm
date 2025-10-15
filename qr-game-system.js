@@ -119,7 +119,7 @@ function copyGameURL() {
 
 function openTeacherControl(gameCode) {
     // Abrir control del profesor
-    const controlURL = `teacher.html?code=${gameCode}`;
+    const controlURL = `admin-control.html?code=${gameCode}`;
     window.open(controlURL, '_blank', 'width=1200,height=800');
 }
 

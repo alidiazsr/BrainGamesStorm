@@ -408,7 +408,7 @@ function startQuizOldSystem(quizId) {
     }
     
     // Abrir ventana de control
-    const controlUrl = 'teacher.html?code=' + gameCode;
+    const controlUrl = 'admin-control.html?code=' + gameCode;
     window.open(controlUrl, '_blank', 'width=1200,height=800');
     
     const quiz = getQuizById(quizId);
