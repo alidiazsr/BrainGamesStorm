@@ -525,18 +525,7 @@ if (typeof window !== 'undefined') {
 
 // ====== CONFIGURACIÓN FIREBASE PARA ESTUDIANTES ======
 
-// Configuración Firebase - La misma que en firebase-game-system.js
-const firebaseConfig = {
-    apiKey: "AIzaSyDLIQ_kPXmplHgaJvvtVDgSpTxVoAgisjA",
-    authDomain: "braingamesstorm.firebaseapp.com",
-    databaseURL: "https://braingamesstorm-default-rtdb.firebaseio.com",
-    projectId: "braingamesstorm",
-    storageBucket: "braingamesstorm.firebasestorage.app",
-    messagingSenderId: "426491473230",
-    appId: "1:426491473230:web:c3ac2d5cf1f74afb47e7c1"
-};
-
-// Variable para Firebase
+// Variable para Firebase (usa configuración de firebase-game-system.js)
 let firebaseApp = null;
 let firebaseDatabase = null;
 
@@ -545,21 +534,23 @@ async function initializeFirebaseForStudents() {
     try {
         console.log('🔥 Inicializando Firebase para estudiantes...');
         
-        // Cargar Firebase SDK dinámicamente
-        if (!window.firebase) {
+        // Usar configuración global de firebase-game-system.js
+        if (typeof window.firebase === 'undefined') {
             console.log('📦 Cargando Firebase SDK...');
             await loadScript('https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js');
             await loadScript('https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js');
         }
 
-        // Inicializar Firebase
-        if (!firebaseApp) {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            firebaseDatabase = firebase.database();
-            console.log('✅ Firebase inicializado para estudiantes');
+        // Verificar si ya hay una app Firebase inicializada
+        if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
+            firebaseApp = window.firebase.apps[0];
+            firebaseDatabase = firebaseApp.database();
+            console.log('✅ Usando app Firebase existente');
+            return true;
         }
         
-        return true;
+        console.error('❌ No hay configuración Firebase disponible');
+        return false;
     } catch (error) {
         console.error('❌ Error inicializando Firebase para estudiantes:', error);
         return false;

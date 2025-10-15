@@ -1,8 +1,8 @@
 // ====== SISTEMA DE FIREBASE PARA MÚLTIPLES DISPOSITIVOS ======
 // Este sistema permite que funcione desde cualquier red/dispositivo
 
-// Configuración de Firebase (tu proyecto real)
-const firebaseConfig = {
+// Configuración de Firebase (tu proyecto real) - Global
+window.firebaseConfig = {
     apiKey: "AIzaSyDLIQ_kPXmplHgaJvvtVDgSpTxVoAgisjA",
     authDomain: "braingamesstorm.firebaseapp.com",
     databaseURL: "https://braingamesstorm-default-rtdb.firebaseio.com",
@@ -39,7 +39,7 @@ function initializeFirebase() {
         // Inicializar Firebase si no está inicializado
         if (!firebaseApp.apps || !firebaseApp.apps.length) {
             console.log('🔧 Inicializando app Firebase...');
-            firebaseApp.initializeApp(firebaseConfig);
+            firebaseApp.initializeApp(window.firebaseConfig);
             console.log('✅ Firebase app inicializada');
         } else {
             console.log('✅ Firebase app ya existía');
