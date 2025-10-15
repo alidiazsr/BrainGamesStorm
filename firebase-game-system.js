@@ -89,6 +89,95 @@ function showFirebaseReadyMessage() {
     }, 4000);
 }
 
+// Función para validar configuración Firebase
+async function validateFirebaseConfig() {
+    try {
+        console.log('🔍 Validando configuración Firebase...');
+        
+        if (!firebase || !firebase.database) {
+            throw new Error('Firebase SDK no cargado');
+        }
+        
+        // Intentar una operación simple de lectura/escritura
+        const testRef = firebase.database().ref('games/.test');
+        const testData = { timestamp: Date.now() };
+        
+        await testRef.set(testData);
+        console.log('✅ Escritura Firebase exitosa');
+        
+        const snapshot = await testRef.once('value');
+        if (snapshot.val()) {
+            console.log('✅ Lectura Firebase exitosa');
+            await testRef.remove(); // Limpiar
+            return true;
+        } else {
+            throw new Error('No se pudo leer de Firebase');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error validación Firebase:', error);
+        
+        // Mostrar mensaje específico según el error
+        if (error.code === 'PERMISSION_DENIED' || error.message.includes('permission')) {
+            showFirebaseRulesError();
+        } else {
+            showFirebaseConnectionError();
+        }
+        
+        return false;
+    }
+}
+
+// Mostrar error específico de reglas Firebase
+function showFirebaseRulesError() {
+    const messageDiv = createStatusDiv();
+    messageDiv.innerHTML = `
+        <div style="background: #f44336; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>🔧 Configuración Firebase Requerida</h3>
+            <p><strong>Las reglas de Firebase necesitan configuración.</strong></p>
+            <p>📋 <strong>Pasos para solucionar:</strong></p>
+            <ol style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                <li>Ve a: <a href="https://console.firebase.google.com/project/braingamesstorm/database/braingamesstorm-default-rtdb/rules" target="_blank" style="color: #ffeb3b;">Consola Firebase</a></li>
+                <li>Reemplaza las reglas por:</li>
+            </ol>
+            <div style="background: #333; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 12px;">
+{<br>
+&nbsp;&nbsp;"rules": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"games": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"$gameCode": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": true,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}
+            </div>
+            <p>3. Haz clic en <strong>"Publicar"</strong></p>
+            <p>4. Recarga esta página</p>
+        </div>
+    `;
+}
+
+// Mostrar error de conexión Firebase
+function showFirebaseConnectionError() {
+    const messageDiv = createStatusDiv();
+    messageDiv.innerHTML = `
+        <div style="background: #ff9800; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>🌐 Problema de Conexión Firebase</h3>
+            <p><strong>No se pudo conectar a Firebase.</strong></p>
+            <p>📋 <strong>Verifica:</strong></p>
+            <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                <li>Conexión a internet estable</li>
+                <li>Firebase no bloqueado por firewall</li>
+                <li>Recarga la página</li>
+            </ul>
+            <button onclick="location.reload()" style="background: #4caf50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                🔄 Recargar Página
+            </button>
+        </div>
+    `;
+}
+
 // ====== FUNCIONES DE JUEGO CON FIREBASE ======
 
 async function createFirebaseGame(quizId) {
@@ -290,74 +379,82 @@ function createStatusDiv() {
     return statusDiv;
 }
 
-function startQuizWithFirebase(quizId) {
+async function startQuizWithFirebase(quizId) {
     console.log('🔥 startQuizWithFirebase iniciado para quiz:', quizId);
     
     // Mostrar mensaje de carga
     const statusDiv = document.getElementById('game-status') || createStatusDiv();
-    statusDiv.innerHTML = '<p style="color: #0066cc;"><i class="fas fa-spinner fa-spin"></i> Creando juego en la nube...</p>';
+    statusDiv.innerHTML = '<p style="color: #0066cc;"><i class="fas fa-spinner fa-spin"></i> Validando Firebase...</p>';
     
-    console.log('📝 Mensaje de carga mostrado');
-    
-    createFirebaseGame(quizId)
-        .then(gameData => {
-            console.log('✅ Juego Firebase creado:', gameData);
+    try {
+        // Primero validar que Firebase esté configurado correctamente
+        const isFirebaseValid = await validateFirebaseConfig();
+        if (!isFirebaseValid) {
+            console.log('❌ Firebase no válido, no se puede continuar');
+            return; // El error ya se mostró en validateFirebaseConfig
+        }
+        
+        // Si Firebase es válido, continuar con la creación del juego
+        statusDiv.innerHTML = '<p style="color: #0066cc;"><i class="fas fa-spinner fa-spin"></i> Creando juego en la nube...</p>';
+        console.log('📝 Mensaje de carga mostrado');
+        
+        const gameData = await createFirebaseGame(quizId);
+        console.log('✅ Juego Firebase creado:', gameData);
+        
+        if (!gameData) {
+            throw new Error('No se pudo crear el juego');
+        }
+        
+        const gameCode = gameData.gameCode;
+        const quiz = gameData.quiz;
+        
+        // Crear URL para estudiantes
+        const baseURL = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+        const studentURL = baseURL + 'student.html?gameCode=' + gameCode;
+        
+        // Mostrar resultado exitoso
+        statusDiv.innerHTML = 
+            '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">' +
+                '<h2 style="margin: 0 0 15px 0; font-size: 2.5em;"><i class="fas fa-cloud"></i> ¡Juego en la Nube!</h2>' +
+                '<h1 style="font-size: 4em; margin: 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">' + gameCode + '</h1>' +
+                '<p style="font-size: 1.3em; margin: 15px 0; opacity: 0.9;">Cuestionario: <strong>' + quiz.title + '</strong></p>' +
+                '<p style="font-size: 1.1em; margin: 15px 0; opacity: 0.8;">Funciona desde cualquier dispositivo/red</p>' +
+            '</div>' +
             
-            if (!gameData) {
-                throw new Error('No se pudo crear el juego');
-            }
-            
-            const gameCode = gameData.gameCode;
-            const quiz = gameData.quiz;
-            
-            // Crear URL para estudiantes
-            const baseURL = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
-            const studentURL = baseURL + 'student.html?gameCode=' + gameCode;
-            
-            // Mostrar resultado exitoso
-            statusDiv.innerHTML = 
-                '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">' +
-                    '<h2 style="margin: 0 0 15px 0; font-size: 2.5em;"><i class="fas fa-cloud"></i> ¡Juego en la Nube!</h2>' +
-                    '<h1 style="font-size: 4em; margin: 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">' + gameCode + '</h1>' +
-                    '<p style="font-size: 1.3em; margin: 15px 0; opacity: 0.9;">Cuestionario: <strong>' + quiz.title + '</strong></p>' +
-                    '<p style="font-size: 1.1em; margin: 15px 0; opacity: 0.8;">Funciona desde cualquier dispositivo/red</p>' +
+            '<div style="background: white; padding: 25px; border-radius: 12px; border: 2px solid #e9ecef; margin: 20px 0;">' +
+                '<h3 style="margin: 0 0 15px 0; color: #333; text-align: center;"><i class="fas fa-qrcode"></i> Código QR para Estudiantes</h3>' +
+                '<div id="qrcode" style="display: flex; justify-content: center; margin: 20px 0;"></div>' +
+                '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;">' +
+                    '<p style="margin: 0; font-size: 14px; color: #666;"><strong>URL para estudiantes:</strong></p>' +
+                    '<input type="text" value="' + studentURL + '" readonly style="width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; background: white;">' +
+                    '<button onclick="copyToClipboard(\'' + studentURL + '\')" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;"><i class="fas fa-copy"></i> Copiar URL</button>' +
                 '</div>' +
-                
-                '<div style="background: white; padding: 25px; border-radius: 12px; border: 2px solid #e9ecef; margin: 20px 0;">' +
-                    '<h3 style="margin: 0 0 15px 0; color: #333; text-align: center;"><i class="fas fa-qrcode"></i> Código QR para Estudiantes</h3>' +
-                    '<div id="qrcode" style="display: flex; justify-content: center; margin: 20px 0;"></div>' +
-                    '<div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #007bff;">' +
-                        '<p style="margin: 0; font-size: 14px; color: #666;"><strong>URL para estudiantes:</strong></p>' +
-                        '<input type="text" value="' + studentURL + '" readonly style="width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; background: white;">' +
-                        '<button onclick="copyToClipboard(\'' + studentURL + '\')" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;"><i class="fas fa-copy"></i> Copiar URL</button>' +
-                    '</div>' +
-                '</div>' +
-                
-                '<div style="text-align: center; margin: 25px 0;">' +
-                    '<button onclick="openGameControl(\'' + gameCode + '\')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); transition: all 0.3s ease;"><i class="fas fa-play-circle"></i> Abrir Control del Juego</button>' +
-                '</div>';
+            '</div>' +
             
-            // Generar QR Code
-            setTimeout(() => {
-                if (typeof QRCode !== 'undefined') {
-                    const qrContainer = document.getElementById('qrcode');
-                    if (qrContainer) {
-                        new QRCode(qrContainer, {
-                            text: studentURL,
-                            width: 200,
-                            height: 200,
-                            colorDark: "#000000",
-                            colorLight: "#ffffff"
-                        });
-                    }
+            '<div style="text-align: center; margin: 25px 0;">' +
+                '<button onclick="openGameControl(\'' + gameCode + '\')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); transition: all 0.3s ease;"><i class="fas fa-play-circle"></i> Abrir Control del Juego</button>' +
+            '</div>';
+        
+        // Generar QR Code
+        setTimeout(() => {
+            if (typeof QRCode !== 'undefined') {
+                const qrContainer = document.getElementById('qrcode');
+                if (qrContainer) {
+                    new QRCode(qrContainer, {
+                        text: studentURL,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff"
+                    });
                 }
-            }, 100);
-            
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            statusDiv.innerHTML = '<p style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i> Error: ' + error.message + '</p>';
-        });
+            }
+        }, 100);
+        
+    } catch (error) {
+        console.error('❌ Error en startQuizWithFirebase:', error);
+        statusDiv.innerHTML = '<p style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i> Error: ' + error.message + '</p>';
+    }
 }
 
 // ====== FUNCIONES DE UTILIDAD ======

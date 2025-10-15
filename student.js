@@ -281,10 +281,9 @@ function initializeAvatar() {
 // ====== INICIALIZACIÓN ======
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay datos del nuevo sistema autónomo
+    // Verificar si hay datos del sistema de archivos
     const urlParams = new URLSearchParams(window.location.search);
     const gameCode = urlParams.get('gameCode');
-    const quizData = urlParams.get('quizData');
     const gameFile = urlParams.get('gameFile');
     const fromFile = urlParams.get('fromFile');
     
@@ -312,11 +311,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Enfocar en el nombre
         document.getElementById('playerName').focus();
         
-    } else if (gameCode && quizData) {
-        // Nuevo sistema autónomo - pre-llenar código y ocultar campo
+    } else if (gameCode) {
+        // Sistema Firebase - pre-llenar código del URL
         document.getElementById('gameCodeInput').value = gameCode;
-        document.getElementById('gameCodeInput').style.display = 'none';
-        document.querySelector('label[for="gameCodeInput"]').style.display = 'none';
+        document.getElementById('playerName').focus();
         
         // Mostrar mensaje informativo
         const infoDiv = document.createElement('div');
@@ -403,9 +401,8 @@ async function joinGame(gameCode, playerName) {
     try {
         console.log('🔍 Intentando unirse al juego:', gameCode, 'con jugador:', playerName);
         
-        // Verificar si es el nuevo sistema autónomo
+        // Verificar si es el nuevo sistema de archivos
         const urlParams = new URLSearchParams(window.location.search);
-        const quizData = urlParams.get('quizData');
         const fromFile = urlParams.get('fromFile');
         
         if (fromFile && window.currentGameData) {
@@ -447,35 +444,8 @@ async function joinGame(gameCode, playerName) {
                 startQuizFromFile();
             }, 3000);
             
-        } else if (quizData) {
-            // Nuevo sistema autónomo
-            const game = joinStandaloneGame();
-            if (!game) {
-                alert('Error al acceder al juego. Verifica el enlace proporcionado por el profesor.');
-                return;
-            }
-            
-            const playerId = addPlayerToStandaloneGame(gameCode, playerName, getPlayerAvatar());
-            if (!playerId) {
-                alert('Error al unirse al juego');
-                return;
-            }
-            
-            // Guardar datos del jugador
-            currentGameCode = gameCode;
-            currentPlayerId = playerId;
-            currentPlayerName = playerName;
-            currentQuiz = game.quiz;
-            
-            // Cambiar a pantalla de espera
-            showScreen('waitingScreen');
-            updateWaitingScreen();
-            
-            // Mostrar mensaje de éxito
-            soundSystem.playWelcome();
-            
         } else {
-            // Sistema antiguo/Firebase - ahora es asíncrono
+            // Sistema Firebase - ahora es asíncrono
             console.log('🔍 Buscando juego activo...');
             const game = await getActiveGame(gameCode);
             if (!game) {
