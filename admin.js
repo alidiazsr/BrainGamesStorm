@@ -729,3 +729,73 @@ function exportQuizAsJson() {
         alert('Error: ' + error.message);
     }
 }
+
+function diagnosticarFirebase() {
+    console.log('🔍 Iniciando diagnóstico de Firebase...');
+    
+    const diagnosticos = [];
+    
+    // 1. Verificar si Firebase está cargado
+    if (typeof firebase === 'undefined') {
+        diagnosticos.push('❌ Firebase SDK no está cargado');
+    } else {
+        diagnosticos.push('✅ Firebase SDK está cargado');
+    }
+    
+    // 2. Verificar configuración
+    if (typeof firebaseConfig === 'undefined') {
+        diagnosticos.push('❌ firebaseConfig no está definido');
+    } else {
+        diagnosticos.push('✅ firebaseConfig está definido');
+        if (firebaseConfig.projectId === 'braingamesstorm') {
+            diagnosticos.push('✅ Project ID correcto: braingamesstorm');
+        } else {
+            diagnosticos.push(`❌ Project ID incorrecto: ${firebaseConfig.projectId}`);
+        }
+    }
+    
+    // 3. Verificar inicialización de app
+    try {
+        const apps = firebase.getApps();
+        if (apps.length > 0) {
+            diagnosticos.push(`✅ Firebase app inicializada (${apps.length} apps)`);
+        } else {
+            diagnosticos.push('❌ Ninguna app de Firebase inicializada');
+        }
+    } catch (error) {
+        diagnosticos.push(`❌ Error verificando apps: ${error.message}`);
+    }
+    
+    // 4. Verificar Firestore
+    try {
+        if (typeof db !== 'undefined' && db) {
+            diagnosticos.push('✅ Firestore database está disponible');
+            
+            // Intentar una operación simple
+            const testCollection = db.collection('test');
+            diagnosticos.push('✅ Conexión a Firestore funcional');
+        } else {
+            diagnosticos.push('❌ Firestore database no está disponible');
+        }
+    } catch (error) {
+        diagnosticos.push(`❌ Error con Firestore: ${error.message}`);
+    }
+    
+    // 5. Verificar conectividad
+    try {
+        fetch('https://firestore.googleapis.com/')
+            .then(() => diagnosticos.push('✅ Conectividad a Google/Firebase OK'))
+            .catch(() => diagnosticos.push('❌ Problemas de conectividad'));
+    } catch (error) {
+        diagnosticos.push(`❌ Error de conectividad: ${error.message}`);
+    }
+    
+    // Mostrar resultados
+    setTimeout(() => {
+        const resultado = diagnosticos.join('\n');
+        console.log('📋 Diagnóstico completo:\n', resultado);
+        alert(`🔍 DIAGNÓSTICO DE FIREBASE\n\n${resultado}\n\n${diagnosticos.filter(d => d.startsWith('❌')).length === 0 ? 
+            '🎉 ¡Todo parece estar bien! Si sigues teniendo problemas, intenta recargar la página.' : 
+            '⚠️ Se encontraron problemas. Revisa la consola para más detalles.'}`);
+    }, 1000);
+}
