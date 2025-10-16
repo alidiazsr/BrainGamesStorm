@@ -434,6 +434,7 @@ function importQuizFromJson() {
 }
 
 async function handleJsonFileImport(event) {
+    console.log('🔄 NUEVA FUNCIÓN handleJsonFileImport - Versión 2.0');
     const file = event.target.files[0];
     if (!file) return;
     
@@ -612,4 +613,4 @@ function diagnosticFirebase() {
         '⚠️ Se encontraron problemas. Revisa la consola.'}`);
 }
 
-console.log('📝 Admin panel limpio cargado');
+console.log('📝 Admin panel limpio cargado - VERSIÓN 2.0');
