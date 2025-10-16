@@ -170,6 +170,9 @@
             <div class="game-header">
                 <h1><i class="fas fa-brain"></i> Brain Games Storm</h1>
                 <h2 id="quizTitle">Cargando...</h2>
+                <p id="gameCodeInfo" style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: bold;">
+                    Código del juego: <span id="displayGameCode">------</span>
+                </p>
                 <p>¡Únete al juego!</p>
             </div>
             
@@ -290,8 +293,9 @@
             // Mostrar área de unión
             document.getElementById('joinArea').style.display = 'block';
             
-            // Configurar título
+            // Configurar título y código
             document.getElementById('quizTitle').textContent = currentGame.quiz.title;
+            document.getElementById('displayGameCode').textContent = gameId;
             
             // Configurar avatares
             setupAvatars();

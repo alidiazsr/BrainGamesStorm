@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control del Profesor - Brain Games Storm</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .teacher-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .game-header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .game-code-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            letter-spacing: 3px;
+        }
+        
+        .control-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .player-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e9ecef;
+        }
+        
+        .player-card.online {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .player-avatar {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .player-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .player-status {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .current-question {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+        }
+        
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .answers-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .answer-option {
+            background: #f8f9fa;
+            margin: 8px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dee2e6;
+        }
+        
+        .answer-option.correct {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f1aeb5;
+        }
+    </style>
+</head>
+<body>
+    <div class="teacher-container">
+        <!-- Loading Area -->
+        <div id="loadingArea" class="loading">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>Cargando control del profesor...</p>
+        </div>
+        
+        <!-- Error Area -->
+        <div id="errorArea" style="display: none;">
+            <div class="error">
+                <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                <p id="errorMessage"></p>
+                <button class="btn btn-primary" onclick="window.location.href='admin.html'">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al Panel Admin
+                </button>
+            </div>
+        </div>
+        
+        <!-- Teacher Control Area -->
+        <div id="teacherControlArea" style="display: none;">
+            <!-- Game Header -->
+            <div class="game-header">
+                <h1 id="quizTitle">Cuestionario</h1>
+                <div class="game-code-display" id="gameCodeDisplay">------</div>
+                <p>Los estudiantes deben ingresar este código para unirse</p>
+            </div>
+            
+            <!-- Game Statistics -->
+            <div class="control-section">
+                <h3><i class="fas fa-chart-bar"></i> Estadísticas del Juego</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number" id="playersCount">0</span>
+                        <span class="stat-label">Jugadores</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="questionsTotal">0</span>
+                        <span class="stat-label">Preguntas</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="currentQuestionNum">0</span>
+                        <span class="stat-label">Pregunta Actual</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="gameStatus">Esperando</span>
+                        <span class="stat-label">Estado</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Players List -->
+            <div class="control-section">
+                <h3><i class="fas fa-users"></i> Jugadores Conectados</h3>
+                <div id="playersGrid" class="players-grid">
+                    <div class="player-card">
+                        <div class="player-avatar">👤</div>
+                        <div class="player-name">Esperando jugadores...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Controls -->
+            <div class="control-section">
+                <h3><i class="fas fa-gamepad"></i> Control del Juego</h3>
+                <div class="control-buttons">
+                    <button class="btn btn-success" id="startGameBtn" onclick="startGame()">
+                        <i class="fas fa-play"></i>
+                        Iniciar Juego
+                    </button>
+                    <button class="btn btn-primary" id="nextQuestionBtn" onclick="nextQuestion()" style="display: none;">
+                        <i class="fas fa-forward"></i>
+                        Siguiente Pregunta
+                    </button>
+                    <button class="btn btn-warning" id="showResultsBtn" onclick="showResults()" style="display: none;">
+                        <i class="fas fa-trophy"></i>
+                        Mostrar Resultados
+                    </button>
+                    <button class="btn btn-danger" onclick="endGame()">
+                        <i class="fas fa-stop"></i>
+                        Terminar Juego
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Current Question Display -->
+            <div id="currentQuestionArea" class="current-question" style="display: none;">
+                <h3><i class="fas fa-question-circle"></i> Pregunta Actual</h3>
+                <div class="question-text" id="currentQuestionText"></div>
+                <ul class="answers-list" id="currentAnswersList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script src="firebase-simple.js"></script>
+    <script>
+        let currentGame = null;
+        let gameCode = null;
+        let quizData = null;
+        let currentQuestionIndex = 0;
+        let players = [];
+        let gameState = 'waiting'; // waiting, playing, finished
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTeacherControl();
+        });
+        
+        async function initializeTeacherControl() {
+            try {
+                console.log('🎮 Iniciando control del profesor...');
+                
+                // Obtener parámetros de la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const quizId = urlParams.get('quiz');
+                gameCode = urlParams.get('game');
+                
+                if (!quizId || !gameCode) {
+                    // Intentar recuperar de localStorage
+                    const activeGame = localStorage.getItem('activeGame');
+                    if (activeGame) {
+                        const gameInfo = JSON.parse(activeGame);
+                        if (gameInfo.gameCode && gameInfo.quizId) {
+                            gameCode = gameInfo.gameCode;
+                            quizData = getQuizById(gameInfo.quizId);
+                        }
+                    }
+                    
+                    if (!gameCode || !quizData) {
+                        showError('No se encontró información del juego. Accede desde el panel de administración.');
+                        return;
+                    }
+                } else {
+                    // Cargar quiz por ID
+                    quizData = getQuizById(quizId);
+                    if (!quizData) {
+                        showError(`Quiz con ID ${quizId} no encontrado.`);
+                        return;
+                    }
+                }
+                
+                console.log('✅ Datos del juego cargados:', { gameCode, quizData });
+                
+                // Inicializar Firebase
+                if (typeof window.initFirebase === 'function') {
+                    await window.initFirebase();
+                }
+                
+                // Configurar interfaz
+                setupTeacherInterface();
+                
+                // Iniciar actualizaciones en tiempo real
+                startRealTimeUpdates();
+                
+            } catch (error) {
+                console.error('❌ Error inicializando control:', error);
+                showError('Error al cargar el control del profesor: ' + error.message);
+            }
+        }
+        
+        function setupTeacherInterface() {
+            // Ocultar loading
+            document.getElementById('loadingArea').style.display = 'none';
+            
+            // Mostrar control
+            document.getElementById('teacherControlArea').style.display = 'block';
+            
+            // Configurar información del juego
+            document.getElementById('quizTitle').textContent = quizData.title;
+            document.getElementById('gameCodeDisplay').textContent = gameCode;
+            document.getElementById('questionsTotal').textContent = quizData.questions.length;
+            
+            console.log('🎯 Interfaz del profesor configurada');
+        }
+        
+        function startRealTimeUpdates() {
+            // Actualizar lista de jugadores cada 2 segundos
+            setInterval(updatePlayersList, 2000);
+            console.log('🔄 Actualizaciones en tiempo real iniciadas');
+        }
+        
+        async function updatePlayersList() {
+            try {
+                // En una implementación real, esto obtendría los datos de Firebase
+                // Por ahora, mostraremos datos simulados
+                
+                const playersGrid = document.getElementById('playersGrid');
+                const playersCount = document.getElementById('playersCount');
+                
+                if (players.length === 0) {
+                    playersGrid.innerHTML = `
+                        <div class="player-card">
+                            <div class="player-avatar">👤</div>
+                            <div class="player-name">Esperando jugadores...</div>
+                            <div class="player-status">Los estudiantes deben usar el código: ${gameCode}</div>
+                        </div>
+                    `;
+                } else {
+                    playersGrid.innerHTML = players.map(player => `
+                        <div class="player-card online">
+                            <div class="player-avatar">${player.avatar}</div>
+                            <div class="player-name">${player.name}</div>
+                            <div class="player-status">Conectado</div>
+                        </div>
+                    `).join('');
+                }
+                
+                playersCount.textContent = players.length;
+                
+            } catch (error) {
+                console.error('❌ Error actualizando jugadores:', error);
+            }
+        }
+        
+        function startGame() {
+            if (players.length === 0) {
+                alert('⚠️ No hay jugadores conectados. Espera a que se unan estudiantes.');
+                return;
+            }
+            
+            gameState = 'playing';
+            currentQuestionIndex = 0;
+            
+            // Actualizar interfaz
+            document.getElementById('startGameBtn').style.display = 'none';
+            document.getElementById('nextQuestionBtn').style.display = 'inline-block';
+            document.getElementById('currentQuestionArea').style.display = 'block';
+            document.getElementById('gameStatus').textContent = 'Jugando';
+            
+            // Mostrar primera pregunta
+            showCurrentQuestion();
+            
+            alert('🎮 ¡Juego iniciado! Los estudiantes ahora pueden ver las preguntas.');
+            console.log('🎮 Juego iniciado');
+        }
+        
+        function showCurrentQuestion() {
+            if (currentQuestionIndex >= quizData.questions.length) {
+                endGame();
+                return;
+            }
+            
+            const question = quizData.questions[currentQuestionIndex];
+            
+            document.getElementById('currentQuestionNum').textContent = currentQuestionIndex + 1;
+            document.getElementById('currentQuestionText').textContent = question.question;
+            
+            const answersList = document.getElementById('currentAnswersList');
+            answersList.innerHTML = question.answers.map((answer, index) => `
+                <li class="answer-option ${index === question.correctAnswer ? 'correct' : ''}">
+                    ${String.fromCharCode(65 + index)}. ${answer}
+                    ${index === question.correctAnswer ? ' ✓' : ''}
+                </li>
+            `).join('');
+            
+            console.log(`📋 Mostrando pregunta ${currentQuestionIndex + 1}: ${question.question}`);
+        }
+        
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= quizData.questions.length) {
+                // Juego terminado
+                document.getElementById('nextQuestionBtn').style.display = 'none';
+                document.getElementById('showResultsBtn').style.display = 'inline-block';
+                alert('🏁 ¡Todas las preguntas completadas! Muestra los resultados.');
+            } else {
+                showCurrentQuestion();
+            }
+        }
+        
+        function showResults() {
+            alert('🏆 Abriendo página de resultados...');
+            window.open('results-display.html', '_blank');
+        }
+        
+        function endGame() {
+            if (confirm('⚠️ ¿Estás seguro de que quieres terminar el juego?')) {
+                gameState = 'finished';
+                alert('🏁 Juego terminado. Gracias por jugar Brain Games Storm!');
+                window.location.href = 'admin.html';
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('loadingArea').style.display = 'none';
+            document.getElementById('teacherControlArea').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorArea').style.display = 'block';
+        }
+        
+        // Simular algunos jugadores para testing (remover en producción)
+        setTimeout(() => {
+            players = [
+                { name: 'Ana García', avatar: '😊' },
+                { name: 'Carlos López', avatar: '🤓' },
+                { name: 'María Rodríguez', avatar: '🥳' }
+            ];
+            updatePlayersList();
+        }, 3000);
+        
+        console.log('📝 Control del profesor cargado');
+    </script>
+</body>
+</html>

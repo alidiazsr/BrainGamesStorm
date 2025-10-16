@@ -252,11 +252,13 @@ function openStudentPage() {
     const gameCode = gameCodeDisplay ? gameCodeDisplay.textContent : 'DESCONOCIDO';
     
     console.log('👥 Abriendo página para estudiantes');
-    const studentUrl = window.location.href.replace('admin.html', 'index.html');
+    
+    // Los estudiantes usan game.html para unirse
+    const studentUrl = window.location.href.replace('admin.html', 'game.html');
     window.open(studentUrl, '_blank');
     
     // Mostrar instrucciones
-    alert(`👥 PÁGINA PARA ESTUDIANTES ABIERTA\n\n📱 Los estudiantes deben:\n1. Ir a la página que se acaba de abrir\n2. Introducir el código: ${gameCode}\n3. Escribir su nombre\n4. ¡Comenzar a jugar!\n\n💡 Tip: Comparte el enlace directo con tus estudiantes.`);
+    alert(`👥 PÁGINA PARA ESTUDIANTES ABIERTA\n\n📱 Los estudiantes deben:\n1. Ir a la página que se acaba de abrir\n2. Introducir su nombre\n3. Seleccionar un avatar\n4. Hacer clic en "Unirse al juego"\n\nCódigo del juego: ${gameCode}\n\n💡 Tip: Los estudiantes también pueden ir directamente a:\n${studentUrl}`);
 }
 
 function openControlPage() {
@@ -278,16 +280,16 @@ function openControlPage() {
         return;
     }
     
-    // Construir URL con parámetros
-    const gameUrl = `game.html?quiz=${gameInfo.quizId}&game=${gameInfo.gameCode}`;
+    // Construir URL con parámetros para el control del profesor
+    const teacherUrl = `teacher-control.html?quiz=${gameInfo.quizId}&game=${gameInfo.gameCode}`;
     
-    console.log('🔗 URL del juego:', gameUrl);
+    console.log('🔗 URL del control del profesor:', teacherUrl);
     
     if (typeof window.open === 'function') {
-        window.open(gameUrl, '_blank');
-        alert(`🎮 PANEL DE CONTROL ABIERTO\n\n📊 Quiz: ${gameInfo.quizTitle}\n📱 Código: ${gameInfo.gameCode}\n\n💡 Funciones disponibles:\n• Ver estudiantes conectados\n• Iniciar las preguntas\n• Monitorear respuestas\n• Mostrar resultados\n\n⚠️ Mantén esta ventana abierta durante todo el juego.`);
+        window.open(teacherUrl, '_blank');
+        alert(`🎮 CONTROL DEL PROFESOR ABIERTO\n\n📊 Quiz: ${gameInfo.quizTitle}\n📱 Código: ${gameInfo.gameCode}\n\n💡 Funciones disponibles:\n• Ver estudiantes en tiempo real\n• Iniciar el juego\n• Controlar preguntas\n• Mostrar resultados\n\n⚠️ Mantén esta ventana abierta durante todo el juego.`);
     } else {
-        alert(`⚠️ No se puede abrir ventana automáticamente.\n\n📋 Abre manualmente:\n${gameUrl}\n\nCódigo: ${gameInfo.gameCode}`);
+        alert(`⚠️ No se puede abrir ventana automáticamente.\n\n📋 Abre manualmente:\n${teacherUrl}\n\nCódigo: ${gameInfo.gameCode}`);
     }
 }
 
