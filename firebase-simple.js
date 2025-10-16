@@ -161,7 +161,7 @@ async function joinFirebaseGame(gameCode, playerName, avatar) {
         id: playerId,
         name: playerName,
         avatar: avatar,
-        joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        joinedAt: new Date().toISOString(),
         isActive: true
     };
     
