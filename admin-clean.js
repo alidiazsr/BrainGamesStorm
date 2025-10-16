@@ -333,7 +333,7 @@ function setCorrectAnswer(questionId, answerIndex) {
 
 // ====== GUARDAR Y GESTIÓN ======
 
-function saveQuiz() {
+function saveCurrentQuiz() {
     if (!currentQuiz) return;
     
     const titleInput = document.getElementById('quizTitle');
@@ -368,7 +368,20 @@ function saveQuiz() {
     
     // Guardar quiz
     try {
-        saveQuiz(currentQuiz);
+        // Usar la función global de script.js
+        if (typeof window.saveQuiz === 'function') {
+            window.saveQuiz(currentQuiz);
+        } else {
+            // Fallback directo
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            const existingIndex = quizzes.findIndex(q => q.id === currentQuiz.id);
+            if (existingIndex >= 0) {
+                quizzes[existingIndex] = currentQuiz;
+            } else {
+                quizzes.push(currentQuiz);
+            }
+            localStorage.setItem('quizzes', JSON.stringify(quizzes));
+        }
         alert('✅ Cuestionario guardado exitosamente');
         closeQuizForm();
         loadQuizList();
@@ -399,7 +412,14 @@ function duplicateQuiz(quizId) {
         title: `${quiz.title} (Copia)`
     };
     
-    saveQuiz(newQuiz);
+    // Usar función global de script.js
+    if (typeof window.saveQuiz === 'function') {
+        window.saveQuiz(newQuiz);
+    } else {
+        const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+        quizzes.push(newQuiz);
+        localStorage.setItem('quizzes', JSON.stringify(quizzes));
+    }
     loadQuizList();
     alert('Cuestionario duplicado');
 }
@@ -421,35 +441,125 @@ async function handleJsonFileImport(event) {
         const text = await file.text();
         const data = JSON.parse(text);
         
-        // Validar estructura
-        if (!data.title || !Array.isArray(data.questions)) {
-            throw new Error('Formato JSON inválido');
+        console.log('📁 Estructura JSON detectada:', data);
+        
+        let quiz;
+        
+        // Detectar y convertir diferentes formatos de JSON
+        if (data.name && Array.isArray(data.questions)) {
+            // Formato: { name: "...", questions: [{ question: "...", answers: [{ text: "...", correct: true/false }] }] }
+            console.log('📋 Formato detectado: Kahoot/Evaluador style');
+            
+            quiz = {
+                id: generateQuizId(),
+                title: data.name,
+                questions: data.questions.map((q, index) => {
+                    const questionId = (Date.now() + index).toString();
+                    
+                    // Convertir respuestas del formato { text: "...", correct: true/false }
+                    let answers = [];
+                    let correctAnswer = 0;
+                    
+                    if (Array.isArray(q.answers)) {
+                        answers = q.answers.map(ans => ans.text || ans.respuesta || ans);
+                        correctAnswer = q.answers.findIndex(ans => ans.correct === true);
+                        if (correctAnswer === -1) correctAnswer = 0;
+                    } else if (Array.isArray(q.respuestas)) {
+                        answers = q.respuestas;
+                        correctAnswer = q.respuestaCorrecta || 0;
+                    }
+                    
+                    return {
+                        id: questionId,
+                        question: q.question || q.pregunta || '',
+                        answers: answers,
+                        correctAnswer: correctAnswer
+                    };
+                })
+            };
+            
+        } else if (data.title && Array.isArray(data.questions)) {
+            // Formato: { title: "...", questions: [{ question: "...", answers: ["...", "..."], correctAnswer: 0 }] }
+            console.log('📋 Formato detectado: Brain Games style');
+            
+            quiz = {
+                id: generateQuizId(),
+                title: data.title,
+                questions: data.questions.map((q, index) => ({
+                    id: (Date.now() + index).toString(),
+                    question: q.question || q.pregunta || '',
+                    answers: q.answers || q.respuestas || [],
+                    correctAnswer: q.correctAnswer || q.respuestaCorrecta || 0
+                }))
+            };
+            
+        } else {
+            throw new Error('Formato JSON no soportado. Se esperaba "name" o "title" y un array "questions".');
         }
         
-        // Crear quiz
-        const quiz = {
-            id: generateQuizId(),
-            title: data.title,
-            questions: data.questions.map(q => ({
-                id: Date.now().toString() + Math.random(),
-                question: q.question || q.pregunta || '',
-                answers: q.answers || q.respuestas || [],
-                correctAnswer: q.correctAnswer || q.respuestaCorrecta || 0
-            }))
-        };
+        // Validar que el quiz tenga contenido válido
+        if (!quiz.title || !quiz.title.trim()) {
+            throw new Error('El título del cuestionario está vacío');
+        }
         
-        // Guardar
-        saveQuiz(quiz);
+        if (!quiz.questions || quiz.questions.length === 0) {
+            throw new Error('No se encontraron preguntas válidas');
+        }
+        
+        // Validar cada pregunta
+        for (let i = 0; i < quiz.questions.length; i++) {
+            const q = quiz.questions[i];
+            if (!q.question || !q.question.trim()) {
+                throw new Error(`La pregunta ${i + 1} está vacía`);
+            }
+            if (!Array.isArray(q.answers) || q.answers.length < 2) {
+                throw new Error(`La pregunta ${i + 1} debe tener al menos 2 respuestas`);
+            }
+        }
+        
+        console.log('✅ Quiz validado:', {
+            title: quiz.title,
+            questions: quiz.questions.length
+        });
+        
+        // Guardar usando la función global
+        if (typeof saveQuiz === 'function') {
+            saveQuiz(quiz);
+        } else {
+            // Fallback directo a localStorage
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            quizzes.push(quiz);
+            localStorage.setItem('quizzes', JSON.stringify(quizzes));
+        }
+        
+        // Recargar lista
         loadQuizList();
         
         // Preguntar si quiere crear juego inmediatamente
-        if (confirm(`✅ "${quiz.title}" importado exitosamente!\n\n¿Crear juego inmediatamente?`)) {
-            startQuiz(quiz.id);
+        const createNow = confirm(`✅ "${quiz.title}" importado exitosamente!\n\n📊 ${quiz.questions.length} preguntas importadas\n\n¿Crear juego inmediatamente para usar con estudiantes?`);
+        
+        if (createNow) {
+            setTimeout(() => {
+                startQuiz(quiz.id);
+            }, 500);
         }
         
     } catch (error) {
-        console.error('Error importando JSON:', error);
-        alert('❌ Error al importar: ' + error.message);
+        console.error('❌ Error importando JSON:', error);
+        
+        let errorMessage = '❌ Error al importar JSON:\n\n';
+        
+        if (error.message.includes('JSON')) {
+            errorMessage += '• El archivo no es un JSON válido\n• Verifica que no tenga errores de sintaxis';
+        } else if (error.message.includes('formato')) {
+            errorMessage += '• Formato no reconocido\n• Se esperaba estructura con "name" o "title" y "questions"';
+        } else {
+            errorMessage += error.message;
+        }
+        
+        errorMessage += '\n\n💡 Ejemplo de formato válido:\n{\n  "name": "Mi Quiz",\n  "questions": [...]\n}';
+        
+        alert(errorMessage);
     }
     
     // Limpiar input
