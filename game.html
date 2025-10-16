@@ -235,7 +235,22 @@
                 gameId = urlParams.get('game');
                 
                 if (!quizId || !gameId) {
-                    showError('URL de juego inválida');
+                    // Intentar recuperar de localStorage como fallback
+                    const activeGame = localStorage.getItem('activeGame');
+                    if (activeGame) {
+                        const gameInfo = JSON.parse(activeGame);
+                        if (gameInfo.gameCode && gameInfo.quizId) {
+                            console.log('📋 Recuperando juego activo desde localStorage');
+                            // Actualizar URL sin recargar
+                            const newUrl = `${window.location.pathname}?quiz=${gameInfo.quizId}&game=${gameInfo.gameCode}`;
+                            window.history.replaceState({}, '', newUrl);
+                            // Reinicializar con los parámetros correctos
+                            setTimeout(initializeGame, 100);
+                            return;
+                        }
+                    }
+                    
+                    showError('URL de juego inválida. Accede desde el panel de administración o proporciona los parámetros: quiz=ID&game=CODIGO');
                     return;
                 }
                 

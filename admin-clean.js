@@ -165,10 +165,19 @@ async function startQuiz(quizId) {
                 // Crear juego en Firebase
                 const gameCode = await window.createGameInFirebase(quizId);
                 
-                // Mostrar código de juego
-                showGameCode(gameCode, quiz);
-                
-                // Mensaje de éxito
+            // Mostrar código de juego
+            showGameCode(gameCode, quiz);
+            
+            // Guardar información del juego activo para el control
+            const gameInfo = {
+                gameCode: gameCode,
+                quizId: quizId,
+                quizTitle: quiz.title,
+                timestamp: Date.now(),
+                status: 'waiting'
+            };
+            localStorage.setItem('activeGame', JSON.stringify(gameInfo));
+            console.log('💾 Información del juego guardada:', gameInfo);                // Mensaje de éxito
                 setTimeout(() => {
                     alert(`✅ Juego creado en Firestore!\n\n📱 Código: ${gameCode}\n\n🌐 Los estudiantes pueden unirse desde cualquier dispositivo usando este código.`);
                 }, 500);
@@ -253,11 +262,32 @@ function openStudentPage() {
 function openControlPage() {
     console.log('🎮 Abriendo página de control del profesor');
     
+    // Obtener información del juego activo
+    const activeGameData = localStorage.getItem('activeGame');
+    if (!activeGameData) {
+        alert('❌ Error: No hay juego activo.\n\nCrea un juego primero desde el panel de administración.');
+        return;
+    }
+    
+    const gameInfo = JSON.parse(activeGameData);
+    console.log('📋 Información del juego activo:', gameInfo);
+    
+    // Verificar que la información esté completa
+    if (!gameInfo.gameCode || !gameInfo.quizId) {
+        alert('❌ Error: Información del juego incompleta.\n\nCrea un nuevo juego.');
+        return;
+    }
+    
+    // Construir URL con parámetros
+    const gameUrl = `game.html?quiz=${gameInfo.quizId}&game=${gameInfo.gameCode}`;
+    
+    console.log('🔗 URL del juego:', gameUrl);
+    
     if (typeof window.open === 'function') {
-        window.open('game.html', '_blank');
-        alert(`🎮 PANEL DE CONTROL ABIERTO\n\n📊 Desde aquí puedes:\n• Ver estudiantes conectados\n• Iniciar las preguntas\n• Monitorear respuestas\n• Mostrar resultados\n\n⚠️ Mantén esta ventana abierta durante todo el juego.`);
+        window.open(gameUrl, '_blank');
+        alert(`🎮 PANEL DE CONTROL ABIERTO\n\n📊 Quiz: ${gameInfo.quizTitle}\n📱 Código: ${gameInfo.gameCode}\n\n💡 Funciones disponibles:\n• Ver estudiantes conectados\n• Iniciar las preguntas\n• Monitorear respuestas\n• Mostrar resultados\n\n⚠️ Mantén esta ventana abierta durante todo el juego.`);
     } else {
-        alert('⚠️ No se puede abrir ventana automáticamente.\n\nAbre manualmente: game.html');
+        alert(`⚠️ No se puede abrir ventana automáticamente.\n\n📋 Abre manualmente:\n${gameUrl}\n\nCódigo: ${gameInfo.gameCode}`);
     }
 }
 
