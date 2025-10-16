@@ -10,53 +10,8 @@
 </head>
 <body>
     <div class="container">
-        <!-- Pantalla de Login para Admin -->
-        <div class="admin-login-screen" id="adminLoginScreen">
-            <div class="login-container">
-                <div class="login-header">
-                    <i class="fas fa-lock"></i>
-                    <h1>Acceso Administrativo</h1>
-                    <p>Ingresa la contraseña para acceder al panel de control</p>
-                </div>
-                
-                <form class="login-form" id="adminLoginForm">
-                    <div class="form-group">
-                        <label for="adminPassword">
-                            <i class="fas fa-key"></i>
-                            Contraseña de Administrador
-                        </label>
-                        <input 
-                            type="password" 
-                            id="adminPassword" 
-                            name="adminPassword"
-                            placeholder="Ingresa la contraseña"
-                            required
-                            autocomplete="current-password"
-                        >
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-full">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Acceder al Panel
-                    </button>
-                    
-                    <div class="login-error" id="loginError" style="display: none;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Contraseña incorrecta. Intenta nuevamente.</span>
-                    </div>
-                </form>
-                
-                <div class="login-footer">
-                    <button class="btn btn-outline" onclick="goHome()">
-                        <i class="fas fa-home"></i>
-                        Volver al Inicio
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Panel de Administración Principal -->
-        <div class="admin-panel-container" id="adminPanelContainer" style="display: none;">
+        <div class="admin-panel-container" id="adminPanelContainer">
             <header class="admin-header">
                 <nav class="navbar">
                     <a href="index.html" class="logo">
