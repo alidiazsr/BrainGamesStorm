@@ -623,9 +623,23 @@ function handleJsonFileImport(event) {
             // Limpiar input
             event.target.value = '';
             
-            // Mostrar detalles de lo importado
+            // Mostrar detalles de lo importado y ofrecer crear juego Firebase
             const questionSummary = quiz.questions.map((q, i) => (i + 1) + '. ' + q.text).join('\n');
-            alert('Cuestionario importado exitosamente!\n\nTítulo: ' + quiz.title + '\nDescripción: ' + (quiz.description || 'Sin descripción') + '\nTiempo límite: ' + quiz.timeLimit + ' segundos\nPreguntas importadas: ' + quiz.questions.length + '\n\nPreguntas:\n' + questionSummary);
+            
+            const createGame = confirm('✅ Cuestionario importado exitosamente!\n\n' +
+                'Título: ' + quiz.title + '\n' +
+                'Descripción: ' + (quiz.description || 'Sin descripción') + '\n' +
+                'Tiempo límite: ' + quiz.timeLimit + ' segundos\n' +
+                'Preguntas importadas: ' + quiz.questions.length + '\n\n' +
+                '🎮 ¿Quieres crear un juego Firebase AHORA para compartir con estudiantes?\n\n' +
+                '✅ SÍ - Crear juego y obtener código\n' +
+                '❌ NO - Solo guardar localmente');
+            
+            if (createGame) {
+                // Crear juego Firebase automáticamente
+                console.log('🎮 Creando juego Firebase automáticamente para quiz importado:', quiz.id);
+                startQuizWithFirebase(quiz.id, true);
+            }
             
         } catch (error) {
             alert('Error al procesar el archivo JSON: ' + error.message);

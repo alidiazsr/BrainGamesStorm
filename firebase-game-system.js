@@ -458,12 +458,15 @@ function createStatusDiv() {
     return statusDiv;
 }
 
-async function startQuizWithFirebase(quizId) {
-    console.log('🔥 startQuizWithFirebase iniciado para quiz:', quizId);
+async function startQuizWithFirebase(quizId, fromImport = false) {
+    console.log('🔥 startQuizWithFirebase iniciado para quiz:', quizId, fromImport ? '(desde importación JSON)' : '');
     
     // Mostrar mensaje de carga
     const statusDiv = document.getElementById('game-status') || createStatusDiv();
-    statusDiv.innerHTML = '<p style="color: #0066cc;"><i class="fas fa-spinner fa-spin"></i> Conectando con Firebase...</p>';
+    const loadingMessage = fromImport 
+        ? '<p style="color: #0066cc;"><i class="fas fa-spinner fa-spin"></i> Creando juego Firebase desde JSON importado...</p>'
+        : '<p style="color: #0066cc;"><i class="fas fa-spinner fa-spin"></i> Conectando con Firebase...</p>';
+    statusDiv.innerHTML = loadingMessage;
     
     try {
         // Verificar que Firebase esté inicializado básicamente
@@ -492,12 +495,16 @@ async function startQuizWithFirebase(quizId) {
         const studentURL = baseURL + 'student.html?gameCode=' + gameCode;
         
         // Mostrar resultado exitoso
+        const titleText = fromImport ? '¡JSON Importado y Juego Creado!' : '¡Juego en la Nube!';
+        const iconClass = fromImport ? 'fas fa-file-upload' : 'fas fa-cloud';
+        
         statusDiv.innerHTML = 
             '<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">' +
-                '<h2 style="margin: 0 0 15px 0; font-size: 2.5em;"><i class="fas fa-cloud"></i> ¡Juego en la Nube!</h2>' +
+                '<h2 style="margin: 0 0 15px 0; font-size: 2.5em;"><i class="' + iconClass + '"></i> ' + titleText + '</h2>' +
                 '<h1 style="font-size: 4em; margin: 20px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">' + gameCode + '</h1>' +
                 '<p style="font-size: 1.3em; margin: 15px 0; opacity: 0.9;">Cuestionario: <strong>' + quiz.title + '</strong></p>' +
                 '<p style="font-size: 1.1em; margin: 15px 0; opacity: 0.8;">Funciona desde cualquier dispositivo/red</p>' +
+                (fromImport ? '<p style="font-size: 1.0em; margin: 10px 0; opacity: 0.7;">✅ Comparte este código con tus estudiantes</p>' : '') +
             '</div>' +
             
             '<div style="background: white; padding: 25px; border-radius: 12px; border: 2px solid #e9ecef; margin: 20px 0;">' +

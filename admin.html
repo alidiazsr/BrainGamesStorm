@@ -191,5 +191,15 @@
     <script src="script.js"></script>
     <script src="firebase-game-system.js"></script>
     <script src="admin.js"></script>
+    
+    <script>
+        // Event listener para importación de JSON
+        document.addEventListener('DOMContentLoaded', function() {
+            const jsonInput = document.getElementById('jsonFileInput');
+            if (jsonInput) {
+                jsonInput.addEventListener('change', handleJsonFileImport);
+            }
+        });
+    </script>
 </body>
 </html>
