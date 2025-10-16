@@ -1,5 +1,5 @@
-// ====== SISTEMA DE FIREBASE PARA MÚLTIPLES DISPOSITIVOS ======
-// Este sistema permite que funcione desde cualquier red/dispositivo
+// ====== SISTEMA DE FIREBASE CON FIRESTORE PARA MÚLTIPLES DISPOSITIVOS ======
+// Este sistema permite que funcione desde cualquier red/dispositivo usando Firestore
 
 // Configuración de Firebase (tu proyecto real) - Global
 window.firebaseConfig = {
@@ -21,7 +21,7 @@ window.firebaseConfigured = false;
 
 function initializeFirebase() {
     try {
-        console.log('🔥 Iniciando inicialización Firebase...');
+        console.log('🔥 Iniciando inicialización Firebase con Firestore...');
         console.log('- typeof firebase:', typeof firebase);
         console.log('- window.firebase:', typeof window.firebase);
         
@@ -45,12 +45,12 @@ function initializeFirebase() {
             console.log('✅ Firebase app ya existía');
         }
         
-        // Obtener referencia a la base de datos
-        db = firebaseApp.database();
+        // Obtener referencia a Firestore (no Realtime Database)
+        db = firebaseApp.firestore();
         isFirebaseInitialized = true;
         window.firebaseConfigured = true;
         
-        console.log('✅ Firebase completamente listo');
+        console.log('✅ Firestore completamente listo');
         console.log('- db:', !!db);
         console.log('- isFirebaseInitialized:', isFirebaseInitialized);
         console.log('- window.firebaseConfigured:', window.firebaseConfigured);
@@ -66,7 +66,7 @@ function initializeFirebase() {
 }
 
 function loadFirebaseScripts() {
-    console.log('📦 Cargando Firebase SDK...');
+    console.log('📦 Cargando Firebase SDK con Firestore...');
     
     // Verificar si ya hay scripts Firebase cargándose
     if (document.querySelector('script[src*="firebase"]')) {
@@ -74,10 +74,10 @@ function loadFirebaseScripts() {
         return;
     }
     
-    // Cargar Firebase SDK si no está presente
+    // Cargar Firebase SDK con Firestore
     const scripts = [
-        'https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js',
-        'https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js'
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
     ];
     
     let loaded = 0;
@@ -119,13 +119,13 @@ function showFirebaseReadyMessage() {
     }, 4000);
 }
 
-// Función para validar configuración Firebase
+// Función para validar configuración Firebase con Firestore
 async function validateFirebaseConfig() {
     try {
-        console.log('🔍 Validando configuración Firebase...');
+        console.log('🔍 Validando configuración Firebase con Firestore...');
         
-        if (!firebase || !firebase.database) {
-            console.log('❌ Firebase SDK no disponible');
+        if (!firebase || !firebase.firestore) {
+            console.log('❌ Firebase o Firestore SDK no disponible');
             showFirebaseConnectionError();
             return false;
         }
@@ -137,21 +137,21 @@ async function validateFirebaseConfig() {
             return false;
         }
         
-        console.log('✅ Firebase básicamente válido');
+        console.log('✅ Firestore básicamente válido');
         
-        // Prueba básica sin reglas estrictas
+        // Prueba básica con Firestore
         try {
-            // Solo verificar que podemos crear una referencia
-            const testRef = firebase.database().ref('games/.test');
-            console.log('✅ Referencia Firebase creada exitosamente');
+            // Solo verificar que podemos crear una referencia a una colección
+            const testRef = db.collection('games');
+            console.log('✅ Referencia Firestore creada exitosamente');
             return true;
         } catch (error) {
-            console.log('⚠️ Advertencia Firebase (pero continuamos):', error.code);
+            console.log('⚠️ Advertencia Firestore (pero continuamos):', error.code);
             
             // Si es error de permisos, mostrar mensaje específico pero continuar
-            if (error.code === 'PERMISSION_DENIED' || error.message.includes('permission')) {
-                console.log('🔧 Firebase conectado pero reglas necesitan configuración');
-                showFirebaseRulesWarning();
+            if (error.code === 'permission-denied' || error.message.includes('permission')) {
+                console.log('🔧 Firestore conectado pero reglas necesitan configuración');
+                showFirestoreRulesWarning();
                 return true; // Permitir continuar para que vea el mensaje de reglas
             }
             
@@ -166,17 +166,17 @@ async function validateFirebaseConfig() {
     }
 }
 
-// Mostrar advertencia de reglas (no error crítico)
-function showFirebaseRulesWarning() {
+// Mostrar advertencia de reglas Firestore
+function showFirestoreRulesWarning() {
     const messageDiv = createStatusDiv();
     messageDiv.innerHTML = `
         <div style="background: #ff9800; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3>⚠️ Firebase Conectado - Reglas Pendientes</h3>
-            <p><strong>Firebase funciona pero necesita configuración de reglas.</strong></p>
-            <p>📋 <strong>Configura las reglas para acceso completo:</strong></p>
+            <h3>⚠️ Firestore Conectado - Reglas Pendientes</h3>
+            <p><strong>Firestore funciona pero necesita configuración de reglas.</strong></p>
+            <p>📋 <strong>Configura las reglas Firestore:</strong></p>
             <ol style="text-align: left; margin: 10px 0; padding-left: 20px;">
-                <li>Ve a: <a href="https://console.firebase.google.com/project/braingamesstorm/database/braingamesstorm-default-rtdb/rules" target="_blank" style="color: #ffeb3b;">Consola Firebase</a></li>
-                <li>Reemplaza las reglas por las del archivo CONFIGURAR_REGLAS_FIREBASE.md</li>
+                <li>Ve a: <a href="https://console.firebase.google.com/project/braingamesstorm/firestore/rules" target="_blank" style="color: #ffeb3b;">Reglas Firestore</a></li>
+                <li>Reemplaza las reglas por reglas de desarrollo</li>
                 <li>Haz clic en "Publicar"</li>
             </ol>
             <p><strong>El sistema funcionará correctamente después de esto.</strong></p>
@@ -184,32 +184,31 @@ function showFirebaseRulesWarning() {
     `;
 }
 
-// Mostrar error específico de reglas Firebase
+// Mostrar error específico de reglas Firestore
 function showFirebaseRulesError() {
     const messageDiv = createStatusDiv();
     messageDiv.innerHTML = `
         <div style="background: #f44336; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3>🔧 Configuración Firebase Requerida</h3>
-            <p><strong>Las reglas de Firebase necesitan configuración.</strong></p>
+            <h3>🔧 Configuración Firestore Requerida</h3>
+            <p><strong>Las reglas de Firestore necesitan configuración.</strong></p>
             <p>📋 <strong>Pasos para solucionar:</strong></p>
             <ol style="text-align: left; margin: 10px 0; padding-left: 20px;">
-                <li>Ve a: <a href="https://console.firebase.google.com/project/braingamesstorm/database/braingamesstorm-default-rtdb/rules" target="_blank" style="color: #ffeb3b;">Consola Firebase</a></li>
+                <li>Ve a: <a href="https://console.firebase.google.com/project/braingamesstorm/firestore/rules" target="_blank" style="color: #ffeb3b;">Reglas Firestore</a></li>
                 <li>Reemplaza las reglas por:</li>
             </ol>
             <div style="background: #333; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 12px;">
-{<br>
-&nbsp;&nbsp;"rules": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;"games": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"$gameCode": {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": true,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": true<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+rules_version = '2';<br>
+service cloud.firestore {<br>
+&nbsp;&nbsp;match /databases/{database}/documents {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;match /games/{gameId} {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;allow read, write: if true;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;}<br>
 &nbsp;&nbsp;}<br>
 }
             </div>
             <p>3. Haz clic en <strong>"Publicar"</strong></p>
             <p>4. Recarga esta página</p>
+            <p>📖 <strong>Más detalles:</strong> Ver archivo CONFIGURAR_REGLAS_FIRESTORE.md</p>
         </div>
     `;
 }
@@ -247,35 +246,35 @@ async function createFirebaseGame(quizId) {
         // Generar código único
         const gameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
         
-        // Crear datos del juego
+        // Crear datos del juego para Firestore
         const gameData = {
             gameCode: gameCode,
             quiz: quiz,
             players: {},
             status: 'waiting',
             currentQuestion: 0,
-            createdAt: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 horas
+            createdAt: firebase.firestore.Timestamp.now(),
+            expiresAt: firebase.firestore.Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)), // 24 horas
             teacherOnline: true,
-            lastActivity: new Date().toISOString()
+            lastActivity: firebase.firestore.Timestamp.now()
         };
 
         if (isFirebaseInitialized && db) {
             try {
-                // Intentar guardar en Firebase
-                await db.ref('games/' + gameCode).set(gameData);
-                console.log('✅ Juego guardado en Firebase:', gameCode);
+                // Intentar guardar en Firestore
+                await db.collection('games').doc(gameCode).set(gameData);
+                console.log('✅ Juego guardado en Firestore:', gameCode);
                 return gameData;
-            } catch (firebaseError) {
-                console.error('⚠️ Error guardando en Firebase:', firebaseError);
+            } catch (firestoreError) {
+                console.error('⚠️ Error guardando en Firestore:', firestoreError);
                 
-                if (firebaseError.code === 'PERMISSION_DENIED') {
-                    console.log('🔧 Error de permisos Firebase - las reglas necesitan configuración');
+                if (firestoreError.code === 'permission-denied') {
+                    console.log('🔧 Error de permisos Firestore - las reglas necesitan configuración');
                     // Mostrar el mensaje de reglas pero crear el juego localmente como respaldo
-                    showFirebaseRulesError();
+                    showFirestoreRulesWarning();
                 }
                 
-                // Fallback a localStorage cuando Firebase falla
+                // Fallback a localStorage cuando Firestore falla
                 console.log('📁 Usando localStorage como respaldo...');
                 localStorage.setItem('game_' + gameCode, JSON.stringify(gameData));
                 console.log('✅ Juego guardado localmente:', gameCode);
@@ -299,9 +298,11 @@ async function joinFirebaseGame(gameCode, playerName, avatar) {
         let gameData = null;
         
         if (isFirebaseInitialized && db) {
-            // Obtener de Firebase
-            const snapshot = await db.ref('games/' + gameCode).once('value');
-            gameData = snapshot.val();
+            // Obtener de Firestore
+            const doc = await db.collection('games').doc(gameCode).get();
+            if (doc.exists) {
+                gameData = doc.data();
+            }
         } else {
             // Fallback: localStorage
             const stored = localStorage.getItem('game_' + gameCode);
@@ -315,7 +316,7 @@ async function joinFirebaseGame(gameCode, playerName, avatar) {
         }
         
         // Verificar si el juego ha expirado
-        if (gameData.expiresAt && new Date() > new Date(gameData.expiresAt)) {
+        if (gameData.expiresAt && new Date() > gameData.expiresAt.toDate()) {
             throw new Error('El juego ha expirado');
         }
         
@@ -327,7 +328,7 @@ async function joinFirebaseGame(gameCode, playerName, avatar) {
             avatar: avatar,
             score: 0,
             answers: [],
-            joinedAt: new Date().toISOString(),
+            joinedAt: firebase.firestore.Timestamp.now(),
             online: true
         };
         
@@ -338,9 +339,11 @@ async function joinFirebaseGame(gameCode, playerName, avatar) {
         gameData.players[playerId] = playerData;
         
         if (isFirebaseInitialized && db) {
-            // Actualizar en Firebase
-            await db.ref('games/' + gameCode + '/players/' + playerId).set(playerData);
-            console.log('✅ Jugador agregado en Firebase');
+            // Actualizar en Firestore usando merge para no sobrescribir otros datos
+            await db.collection('games').doc(gameCode).update({
+                [`players.${playerId}`]: playerData
+            });
+            console.log('✅ Jugador agregado en Firestore');
         } else {
             // Fallback: localStorage
             localStorage.setItem('game_' + gameCode, JSON.stringify(gameData));
@@ -358,8 +361,12 @@ async function joinFirebaseGame(gameCode, playerName, avatar) {
 async function getFirebaseGame(gameCode) {
     try {
         if (isFirebaseInitialized && db) {
-            const snapshot = await db.ref('games/' + gameCode).once('value');
-            return snapshot.val();
+            const doc = await db.collection('games').doc(gameCode).get();
+            if (doc.exists) {
+                return doc.data();
+            } else {
+                return null;
+            }
         } else {
             const stored = localStorage.getItem('game_' + gameCode);
             return stored ? JSON.parse(stored) : null;
@@ -374,7 +381,7 @@ async function updateGameStatus(gameCode, status, currentQuestion = null) {
     try {
         const updates = {
             status: status,
-            lastActivity: new Date().toISOString()
+            lastActivity: firebase.firestore.Timestamp.now()
         };
         
         if (currentQuestion !== null) {
@@ -382,8 +389,8 @@ async function updateGameStatus(gameCode, status, currentQuestion = null) {
         }
         
         if (isFirebaseInitialized && db) {
-            await db.ref('games/' + gameCode).update(updates);
-            console.log('✅ Estado actualizado en Firebase');
+            await db.collection('games').doc(gameCode).update(updates);
+            console.log('✅ Estado actualizado en Firestore');
         } else {
             const stored = localStorage.getItem('game_' + gameCode);
             if (stored) {
@@ -403,16 +410,16 @@ async function updateGameStatus(gameCode, status, currentQuestion = null) {
 
 function listenToGameChanges(gameCode, callback) {
     if (isFirebaseInitialized && db) {
-        // Listener de Firebase en tiempo real
-        const gameRef = db.ref('games/' + gameCode);
-        gameRef.on('value', (snapshot) => {
-            const gameData = snapshot.val();
-            if (gameData && callback) {
+        // Listener de Firestore en tiempo real
+        const gameRef = db.collection('games').doc(gameCode);
+        const unsubscribe = gameRef.onSnapshot((doc) => {
+            if (doc.exists && callback) {
+                const gameData = doc.data();
                 callback(gameData);
             }
         });
         
-        return () => gameRef.off(); // Función para limpiar listener
+        return unsubscribe; // Función para limpiar listener
     } else {
         // Fallback: polling cada 2 segundos
         const interval = setInterval(() => {

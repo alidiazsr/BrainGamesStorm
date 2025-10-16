@@ -321,13 +321,15 @@ async function addPlayerToGame(gameCode, playerName, avatar = '😎') {
         
         game.players[playerId] = newPlayer;
         
-        // Si es un juego de Firebase, actualizar en Firebase
-        if (firebaseDatabase) {
+        // Si es un juego de Firebase, actualizar en Firestore
+        if (firebaseFirestore) {
             try {
-                await firebaseDatabase.ref(`games/${gameCode}/players/${playerId}`).set(newPlayer);
-                console.log('✅ Jugador agregado a Firebase:', playerId);
+                await firebaseFirestore.collection('games').doc(gameCode).update({
+                    [`players.${playerId}`]: newPlayer
+                });
+                console.log('✅ Jugador agregado a Firestore:', playerId);
             } catch (error) {
-                console.error('❌ Error agregando jugador a Firebase:', error);
+                console.error('❌ Error agregando jugador a Firestore:', error);
                 // Continuar con localStorage como fallback
                 updateActiveGame(gameCode, game);
             }
@@ -527,7 +529,7 @@ if (typeof window !== 'undefined') {
 
 // Variable para Firebase (usa configuración de firebase-game-system.js)
 let firebaseApp = null;
-let firebaseDatabase = null;
+let firebaseFirestore = null;
 
 // Inicializar Firebase para estudiantes
 async function initializeFirebaseForStudents() {
@@ -538,14 +540,14 @@ async function initializeFirebaseForStudents() {
         if (typeof window.firebase === 'undefined') {
             console.log('📦 Cargando Firebase SDK...');
             await loadScript('https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js');
-            await loadScript('https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js');
+            await loadScript('https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js');
         }
 
         // Verificar si ya hay una app Firebase inicializada
         if (window.firebase && window.firebase.apps && window.firebase.apps.length > 0) {
             firebaseApp = window.firebase.apps[0];
-            firebaseDatabase = firebaseApp.database();
-            console.log('✅ Usando app Firebase existente');
+            firebaseFirestore = firebaseApp.firestore();
+            console.log('✅ Usando app Firebase existente con Firestore');
             return true;
         }
         
@@ -573,12 +575,12 @@ function loadScript(src) {
     });
 }
 
-// Función para obtener juego de Firebase
+// Función para obtener juego de Firestore
 async function getFirebaseGame(gameCode) {
     try {
-        console.log('🔍 Buscando juego en Firebase:', gameCode);
+        console.log('🔍 Buscando juego en Firestore:', gameCode);
         
-        if (!firebaseDatabase) {
+        if (!firebaseFirestore) {
             const initialized = await initializeFirebaseForStudents();
             if (!initialized) {
                 console.log('❌ No se pudo inicializar Firebase');
@@ -586,43 +588,43 @@ async function getFirebaseGame(gameCode) {
             }
         }
 
-        const snapshot = await firebaseDatabase.ref(`games/${gameCode}`).once('value');
-        const gameData = snapshot.val();
+        const doc = await firebaseFirestore.collection('games').doc(gameCode).get();
         
-        if (gameData) {
-            console.log('✅ Juego encontrado en Firebase:', gameCode);
+        if (doc.exists) {
+            const gameData = doc.data();
+            console.log('✅ Juego encontrado en Firestore:', gameCode);
             return gameData;
         } else {
-            console.log('❌ Juego no encontrado en Firebase:', gameCode);
+            console.log('❌ Juego no encontrado en Firestore:', gameCode);
             return null;
         }
     } catch (error) {
-        console.error('❌ Error obteniendo juego de Firebase:', error);
+        console.error('❌ Error obteniendo juego de Firestore:', error);
         return null;
     }
 }
 
-// Función para escuchar cambios del juego en Firebase
+// Función para escuchar cambios del juego en Firestore
 function listenToFirebaseGameChanges(gameCode, callback) {
     try {
-        if (!firebaseDatabase) {
+        if (!firebaseFirestore) {
             console.log('❌ Firebase no inicializado para escuchar cambios');
             return null;
         }
         
-        console.log('👂 Escuchando cambios en Firebase para:', gameCode);
+        console.log('👂 Escuchando cambios en Firestore para:', gameCode);
         
-        const gameRef = firebaseDatabase.ref(`games/${gameCode}`);
-        gameRef.on('value', (snapshot) => {
-            const gameData = snapshot.val();
-            if (gameData && callback) {
+        const gameRef = firebaseFirestore.collection('games').doc(gameCode);
+        const unsubscribe = gameRef.onSnapshot((doc) => {
+            if (doc.exists && callback) {
+                const gameData = doc.data();
                 callback(gameData);
             }
         });
         
-        return gameRef;
+        return unsubscribe;
     } catch (error) {
-        console.error('❌ Error configurando listener Firebase:', error);
+        console.error('❌ Error configurando listener Firestore:', error);
         return null;
     }
 }
