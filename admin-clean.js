@@ -205,9 +205,11 @@ function showGameCode(gameCode, quiz) {
     }
     
     // Mostrar modal
-    const startModal = document.getElementById('startModal');
+    const startModal = document.getElementById('startQuizModal');
     if (startModal) {
         startModal.style.display = 'flex';
+    } else {
+        console.log('⚠️ Modal startQuizModal no encontrado');
     }
     
     // Copiar al portapapeles
@@ -223,16 +225,40 @@ function showGameCode(gameCode, quiz) {
 }
 
 function closeStartModal() {
-    const startModal = document.getElementById('startModal');
+    const startModal = document.getElementById('startQuizModal');
     if (startModal) {
         startModal.style.display = 'none';
+    } else {
+        console.log('⚠️ Modal startQuizModal no encontrado para cerrar');
     }
 }
 
 function startQuizSession() {
-    // Abrir game.html para controlar la sesión
-    window.open('game.html', '_blank');
-    closeStartModal();
+    // Función mantenida para compatibilidad - redirige a openControlPage
+    openControlPage();
+}
+
+function openStudentPage() {
+    const gameCodeDisplay = document.getElementById('gameCodeDisplay');
+    const gameCode = gameCodeDisplay ? gameCodeDisplay.textContent : 'DESCONOCIDO';
+    
+    console.log('👥 Abriendo página para estudiantes');
+    const studentUrl = window.location.href.replace('admin.html', 'index.html');
+    window.open(studentUrl, '_blank');
+    
+    // Mostrar instrucciones
+    alert(`👥 PÁGINA PARA ESTUDIANTES ABIERTA\n\n📱 Los estudiantes deben:\n1. Ir a la página que se acaba de abrir\n2. Introducir el código: ${gameCode}\n3. Escribir su nombre\n4. ¡Comenzar a jugar!\n\n💡 Tip: Comparte el enlace directo con tus estudiantes.`);
+}
+
+function openControlPage() {
+    console.log('🎮 Abriendo página de control del profesor');
+    
+    if (typeof window.open === 'function') {
+        window.open('game.html', '_blank');
+        alert(`🎮 PANEL DE CONTROL ABIERTO\n\n📊 Desde aquí puedes:\n• Ver estudiantes conectados\n• Iniciar las preguntas\n• Monitorear respuestas\n• Mostrar resultados\n\n⚠️ Mantén esta ventana abierta durante todo el juego.`);
+    } else {
+        alert('⚠️ No se puede abrir ventana automáticamente.\n\nAbre manualmente: game.html');
+    }
 }
 
 // ====== GESTIÓN DE PREGUNTAS ======
@@ -534,7 +560,9 @@ async function handleJsonFileImport(event) {
         }
         
         // Recargar lista
-        loadQuizList();
+        setTimeout(() => {
+            loadQuizList();
+        }, 100);
         
         // Preguntar si quiere crear juego inmediatamente
         const createNow = confirm(`✅ "${quiz.title}" importado exitosamente!\n\n📊 ${quiz.questions.length} preguntas importadas\n\n¿Crear juego inmediatamente para usar con estudiantes?`);
