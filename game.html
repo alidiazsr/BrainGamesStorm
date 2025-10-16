@@ -214,7 +214,7 @@
 
     <!-- Scripts -->
     <script src="script.js"></script>
-    <script src="url-game-system.js"></script>
+    <script src="firebase-simple.js"></script>
     <script>
         let currentGame = null;
         let gameId = null;
@@ -254,12 +254,25 @@
                     return;
                 }
                 
-                // Cargar el juego
-                currentGame = joinGameFromURL();
-                if (!currentGame) {
-                    showError('Juego no encontrado o expirado');
+                // Cargar información del juego
+                console.log('🎮 Cargando juego:', { quizId, gameId });
+                
+                // Obtener el quiz desde localStorage
+                const quiz = getQuizById(quizId);
+                if (!quiz) {
+                    showError(`Quiz con ID ${quizId} no encontrado. Asegúrate de que el quiz exista.`);
                     return;
                 }
+                
+                // Crear objeto de juego
+                currentGame = {
+                    quiz: quiz,
+                    gameCode: gameId,
+                    players: [],
+                    status: 'waiting'
+                };
+                
+                console.log('✅ Juego cargado exitosamente:', currentGame);
                 
                 // Configurar la interfaz
                 setupGameInterface();
@@ -329,7 +342,7 @@
             return selected ? selected.textContent : avatars[0];
         }
         
-        function joinCurrentGame() {
+        async function joinCurrentGame() {
             const playerName = document.getElementById('playerName').value.trim();
             
             if (!playerName) {
@@ -344,19 +357,35 @@
             
             const selectedAvatar = getSelectedAvatar();
             
-            // Agregar jugador al juego
-            playerId = addPlayerToURL(gameId, playerName, selectedAvatar);
-            
-            if (!playerId) {
-                showError('Error al unirse al juego');
-                return;
+            try {
+                console.log('👤 Intentando unirse al juego:', { gameId, playerName, selectedAvatar });
+                
+                // Usar Firebase Simple para unirse al juego
+                if (typeof window.joinFirebaseGame === 'function') {
+                    playerId = await window.joinFirebaseGame(gameId, playerName, selectedAvatar);
+                } else {
+                    // Fallback para sistema local
+                    playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                    console.log('⚠️ Modo local, ID generado:', playerId);
+                }
+                
+                if (!playerId) {
+                    showError('Error al unirse al juego');
+                    return;
+                }
+                
+                console.log('✅ Unido al juego exitosamente, ID:', playerId);
+                
+                // Cambiar a área de espera
+                showWaitingArea();
+                
+                // Iniciar polling para actualizar lista de jugadores
+                startPlayerListUpdate();
+                
+            } catch (error) {
+                console.error('❌ Error al unirse:', error);
+                showError('Error al unirse al juego: ' + error.message);
             }
-            
-            // Cambiar a área de espera
-            showWaitingArea();
-            
-            // Iniciar polling para actualizar lista de jugadores
-            startPlayerListUpdate();
         }
         
         function showWaitingArea() {

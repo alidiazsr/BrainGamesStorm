@@ -146,6 +146,41 @@ async function createGameInFirebase(quizId) {
     }
 }
 
+// Función para unirse a un juego Firebase
+async function joinFirebaseGame(gameCode, playerName, avatar) {
+    if (!isFirebaseReady) {
+        console.log('🔄 Firebase no listo, inicializando...');
+        const success = await initFirebase();
+        if (!success) {
+            throw new Error('No se pudo inicializar Firebase');
+        }
+    }
+    
+    const playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const playerData = {
+        id: playerId,
+        name: playerName,
+        avatar: avatar,
+        joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        isActive: true
+    };
+    
+    console.log('👤 Uniendo jugador a Firestore:', { gameCode, playerData });
+    
+    try {
+        // Agregar jugador al array de jugadores del juego
+        await db.collection('games').doc(gameCode).update({
+            players: firebase.firestore.FieldValue.arrayUnion(playerData)
+        });
+        
+        console.log('✅ Jugador unido a Firestore:', playerId);
+        return playerId;
+    } catch (error) {
+        console.error('❌ Error uniendo jugador:', error);
+        throw error;
+    }
+}
+
 // Función de diagnóstico simple
 function diagnosticFirebase() {
     console.log('🔍 Diagnóstico Firebase Simple:');
@@ -172,6 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Exponer funciones globalmente
 window.initFirebase = initFirebase;
 window.createGameInFirebase = createGameInFirebase;
+window.joinFirebaseGame = joinFirebaseGame;
 window.diagnosticFirebase = diagnosticFirebase;
 window.isFirebaseReady = () => isFirebaseReady;
 
