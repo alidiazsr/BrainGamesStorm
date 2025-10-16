@@ -391,20 +391,64 @@
         }
         
         function startRealTimeUpdates() {
-            // Actualizar lista de jugadores cada 2 segundos
-            setInterval(updatePlayersList, 2000);
-            console.log('🔄 Actualizaciones en tiempo real iniciadas');
+            console.log('👂 Iniciando escucha en tiempo real de Firebase...');
+            
+            if (typeof window.listenToGameChanges === 'function') {
+                // Escuchar cambios del juego en tiempo real
+                const unsubscribe = window.listenToGameChanges(gameCode, (gameData) => {
+                    if (gameData) {
+                        console.log('🔄 Datos del juego actualizados:', gameData);
+                        updateUIWithGameData(gameData);
+                    } else {
+                        showError('El juego ya no existe o ha sido eliminado');
+                    }
+                });
+                
+                // Guardar función para cancelar escucha
+                window.gameUnsubscribe = unsubscribe;
+                
+                console.log('✅ Escucha en tiempo real Firebase activada');
+            } else {
+                console.log('⚠️ Funciones Firebase no disponibles, usando polling...');
+                // Fallback a polling cada 3 segundos
+                setInterval(updatePlayersList, 3000);
+            }
         }
         
-        async function updatePlayersList() {
+        // Función para actualizar UI con datos de Firebase
+        function updateUIWithGameData(gameData) {
             try {
-                // En una implementación real, esto obtendría los datos de Firebase
-                // Por ahora, mostraremos datos simulados
+                console.log('🎨 Actualizando interfaz con datos:', gameData);
                 
+                // Actualizar jugadores
+                const playersArray = gameData.players || [];
+                updatePlayersList(playersArray);
+                
+                // Actualizar estado del juego
+                const status = gameData.status || 'waiting';
+                document.getElementById('gameStatus').textContent = 
+                    status === 'waiting' ? 'Esperando' :
+                    status === 'playing' ? 'Jugando' :
+                    status === 'finished' ? 'Terminado' : status;
+                
+                // Actualizar pregunta actual
+                const currentQ = gameData.currentQuestion || 0;
+                document.getElementById('currentQuestionNum').textContent = currentQ + 1;
+                
+                // Actualizar controles según estado
+                updateControlButtons(status, currentQ);
+                
+            } catch (error) {
+                console.error('❌ Error actualizando UI:', error);
+            }
+        }
+        
+        function updatePlayersList(playersArray = []) {
+            try {
                 const playersGrid = document.getElementById('playersGrid');
                 const playersCount = document.getElementById('playersCount');
                 
-                if (players.length === 0) {
+                if (playersArray.length === 0) {
                     playersGrid.innerHTML = `
                         <div class="player-card">
                             <div class="player-avatar">👤</div>
@@ -413,42 +457,67 @@
                         </div>
                     `;
                 } else {
-                    playersGrid.innerHTML = players.map(player => `
+                    playersGrid.innerHTML = playersArray.map(player => `
                         <div class="player-card online">
-                            <div class="player-avatar">${player.avatar}</div>
-                            <div class="player-name">${player.name}</div>
-                            <div class="player-status">Conectado</div>
+                            <div class="player-avatar">${player.avatar || '👤'}</div>
+                            <div class="player-name">${player.name || 'Sin nombre'}</div>
+                            <div class="player-status">Conectado ${player.joinedAt ? '✅' : '⏳'}</div>
                         </div>
                     `).join('');
                 }
                 
-                playersCount.textContent = players.length;
+                playersCount.textContent = playersArray.length;
                 
             } catch (error) {
-                console.error('❌ Error actualizando jugadores:', error);
+                console.error('❌ Error actualizando lista de jugadores:', error);
             }
         }
         
-        function startGame() {
-            if (players.length === 0) {
-                alert('⚠️ No hay jugadores conectados. Espera a que se unan estudiantes.');
-                return;
+        function updateControlButtons(status, currentQuestion) {
+            const startBtn = document.getElementById('startGameBtn');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+            const resultsBtn = document.getElementById('showResultsBtn');
+            
+            if (status === 'waiting') {
+                startBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
+                resultsBtn.style.display = 'none';
+            } else if (status === 'playing') {
+                startBtn.style.display = 'none';
+                nextBtn.style.display = 'inline-block';
+                resultsBtn.style.display = 'none';
+                
+                // Si es la última pregunta, mostrar botón de resultados
+                if (currentQuestion >= quizData.questions.length - 1) {
+                    nextBtn.style.display = 'none';
+                    resultsBtn.style.display = 'inline-block';
+                }
+            } else if (status === 'finished') {
+                startBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+                resultsBtn.style.display = 'inline-block';
             }
-            
-            gameState = 'playing';
-            currentQuestionIndex = 0;
-            
-            // Actualizar interfaz
-            document.getElementById('startGameBtn').style.display = 'none';
-            document.getElementById('nextQuestionBtn').style.display = 'inline-block';
-            document.getElementById('currentQuestionArea').style.display = 'block';
-            document.getElementById('gameStatus').textContent = 'Jugando';
-            
-            // Mostrar primera pregunta
-            showCurrentQuestion();
-            
-            alert('🎮 ¡Juego iniciado! Los estudiantes ahora pueden ver las preguntas.');
-            console.log('🎮 Juego iniciado');
+        }
+        
+        async function startGame() {
+            try {
+                console.log('🎮 Iniciando juego...');
+                
+                // Usar Firebase para iniciar el juego
+                const success = await window.startGameInFirebase(gameCode);
+                
+                if (success) {
+                    console.log('✅ Juego iniciado en Firebase');
+                    alert('🎮 ¡Juego iniciado! Los estudiantes ahora pueden ver las preguntas.');
+                } else {
+                    console.error('❌ Error iniciando juego');
+                    alert('❌ Error al iniciar el juego. Intenta de nuevo.');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error en startGame:', error);
+                alert('❌ Error al iniciar el juego: ' + error.message);
+            }
         }
         
         function showCurrentQuestion() {
@@ -473,29 +542,55 @@
             console.log(`📋 Mostrando pregunta ${currentQuestionIndex + 1}: ${question.question}`);
         }
         
-        function nextQuestion() {
-            currentQuestionIndex++;
-            
-            if (currentQuestionIndex >= quizData.questions.length) {
-                // Juego terminado
-                document.getElementById('nextQuestionBtn').style.display = 'none';
-                document.getElementById('showResultsBtn').style.display = 'inline-block';
-                alert('🏁 ¡Todas las preguntas completadas! Muestra los resultados.');
-            } else {
-                showCurrentQuestion();
+        async function nextQuestion() {
+            try {
+                console.log('➡️ Avanzando a la siguiente pregunta...');
+                
+                // Usar Firebase para avanzar pregunta
+                const success = await window.nextQuestionInFirebase(gameCode);
+                
+                if (success) {
+                    console.log('✅ Pregunta actualizada en Firebase');
+                } else {
+                    console.error('❌ Error avanzando pregunta');
+                    alert('❌ Error al avanzar pregunta. Intenta de nuevo.');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error en nextQuestion:', error);
+                alert('❌ Error al avanzar pregunta: ' + error.message);
             }
         }
         
-        function showResults() {
-            alert('🏆 Abriendo página de resultados...');
-            window.open('results-display.html', '_blank');
+        async function showResults() {
+            try {
+                console.log('🏆 Terminando juego y mostrando resultados...');
+                
+                // Terminar juego en Firebase
+                await window.endGameInFirebase(gameCode);
+                
+                alert('🏆 Abriendo página de resultados...');
+                window.open('results-display.html', '_blank');
+                
+            } catch (error) {
+                console.error('❌ Error mostrando resultados:', error);
+                alert('❌ Error al mostrar resultados: ' + error.message);
+            }
         }
         
-        function endGame() {
+        async function endGame() {
             if (confirm('⚠️ ¿Estás seguro de que quieres terminar el juego?')) {
-                gameState = 'finished';
-                alert('🏁 Juego terminado. Gracias por jugar Brain Games Storm!');
-                window.location.href = 'admin.html';
+                try {
+                    // Terminar juego en Firebase
+                    await window.endGameInFirebase(gameCode);
+                    
+                    alert('🏁 Juego terminado. Gracias por jugar Brain Games Storm!');
+                    window.location.href = 'admin.html';
+                    
+                } catch (error) {
+                    console.error('❌ Error terminando juego:', error);
+                    alert('❌ Error al terminar juego: ' + error.message);
+                }
             }
         }
         

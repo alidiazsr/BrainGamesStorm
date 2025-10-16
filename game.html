@@ -364,17 +364,11 @@
             try {
                 console.log('👤 Intentando unirse al juego:', { gameId, playerName, selectedAvatar });
                 
-                // Usar Firebase Simple para unirse al juego
-                if (typeof window.joinFirebaseGame === 'function') {
-                    playerId = await window.joinFirebaseGame(gameId, playerName, selectedAvatar);
-                } else {
-                    // Fallback para sistema local
-                    playerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-                    console.log('⚠️ Modo local, ID generado:', playerId);
-                }
+                // Usar Firebase para unirse al juego
+                playerId = await window.joinFirebaseGame(gameId, playerName, selectedAvatar);
                 
                 if (!playerId) {
-                    showError('Error al unirse al juego');
+                    showError('❌ No se pudo unir al juego. Verifica el código.');
                     return;
                 }
                 
@@ -383,68 +377,105 @@
                 // Cambiar a área de espera
                 showWaitingArea();
                 
-                // Iniciar polling para actualizar lista de jugadores
-                startPlayerListUpdate();
+                // Iniciar listeners en tiempo real
+                startRealtimeListeners();
                 
             } catch (error) {
                 console.error('❌ Error al unirse:', error);
-                showError('Error al unirse al juego: ' + error.message);
+                showError('❌ Error al unirse al juego: ' + error.message);
+            }
+        }
+        
+        // Iniciar listeners de Firebase en tiempo real
+        function startRealtimeListeners() {
+            if (typeof window.listenToGameChanges === 'function') {
+                console.log('🔄 Iniciando escucha en tiempo real...');
+                
+                window.listenToGameChanges(gameId, (gameData) => {
+                    console.log('📡 Cambios del juego recibidos:', gameData);
+                    updateGameUI(gameData);
+                });
+            } else {
+                console.warn('⚠️ Firebase listeners no disponibles, usando polling');
+                startPlayerListUpdate();
+            }
+        }
+        
+        // Actualizar UI del juego con datos de Firebase
+        function updateGameUI(gameData) {
+            try {
+                // Actualizar lista de jugadores
+                updatePlayersListFromFirebase(gameData.players || []);
+                
+                // Verificar estado del juego
+                const status = gameData.status || 'waiting';
+                console.log('🎮 Estado del juego:', status);
+                
+                if (status === 'playing' && gameData.currentQuestion !== undefined) {
+                    // El juego ha comenzado - mostrar pregunta
+                    showCurrentQuestion(gameData);
+                } else if (status === 'finished') {
+                    // Juego terminado - mostrar resultados
+                    showGameResults();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error actualizando UI del juego:', error);
+            }
+        }
+        
+        function updatePlayersListFromFirebase(playersArray) {
+            const playersList = document.getElementById('playersList');
+            const playersCount = document.getElementById('playersCount');
+            
+            if (playersList) {
+                playersList.innerHTML = playersArray.map(player => `
+                    <div class="player-item ${player.id === playerId ? 'current-player' : ''}">
+                        <span class="player-avatar">${player.avatar || '👤'}</span>
+                        <span class="player-name">${player.name || 'Sin nombre'}</span>
+                        ${player.id === playerId ? '<span class="you-badge">Tú</span>' : ''}
+                    </div>
+                `).join('');
+            }
+            
+            if (playersCount) {
+                playersCount.textContent = playersArray.length;
             }
         }
         
         function showWaitingArea() {
             document.getElementById('joinArea').style.display = 'none';
             document.getElementById('waitingArea').style.display = 'block';
-            document.getElementById('waitingQuizTitle').textContent = currentGame.quiz.title;
-            updatePlayersList();
+            
+            // Mostrar información del juego
+            if (currentGame && currentGame.quiz) {
+                document.getElementById('waitingQuizTitle').textContent = currentGame.quiz.title;
+            } else {
+                document.getElementById('waitingQuizTitle').textContent = `Juego ${gameId}`;
+            }
         }
         
-        function updatePlayersList() {
-            // Recargar datos del juego
-            const gameData = localStorage.getItem(`game_${gameId}`);
-            if (!gameData) return;
-            
-            currentGame = JSON.parse(gameData);
-            
-            const playersList = document.getElementById('playersList');
-            const playersCount = document.getElementById('playersCount');
-            
-            playersList.innerHTML = '';
-            playersCount.textContent = currentGame.players.length;
-            
-            currentGame.players.forEach(player => {
-                const playerCard = document.createElement('div');
-                playerCard.className = 'player-card';
-                playerCard.innerHTML = `
-                    <div class="player-avatar">${player.avatar}</div>
-                    <div class="player-name">${player.name}</div>
-                `;
-                playersList.appendChild(playerCard);
-            });
-        }
+
         
-        function startPlayerListUpdate() {
-            // Actualizar lista cada 2 segundos
-            const updateInterval = setInterval(() => {
-                updatePlayersList();
-                
-                // Verificar si el juego ha comenzado
-                const gameData = localStorage.getItem(`game_${gameId}`);
-                if (gameData) {
-                    const game = JSON.parse(gameData);
-                    if (game.status === 'playing') {
-                        clearInterval(updateInterval);
-                        startGame();
-                    }
-                }
-            }, 2000);
-        }
-        
-        function startGame() {
-            // Aquí puedes cargar el contenido del juego real
-            // Por ahora, redirigir a student.html con los parámetros necesarios
-            const gameURL = `student.html?quiz=${currentGame.quiz.id}&game=${gameId}&player=${playerId}`;
+        // Mostrar pregunta actual cuando el juego inicia
+        function showCurrentQuestion(gameData) {
+            console.log('📋 Mostrando pregunta del juego:', gameData);
+            
+            // Ocultar área de espera y mostrar pregunta
+            document.getElementById('waitingArea').style.display = 'none';
+            
+            // Aquí redirigimos a student.html con parámetros de Firebase
+            const gameURL = `student.html?quiz=${gameData.quizId || currentGame.quiz.id}&game=${gameId}&player=${playerId}`;
             window.location.href = gameURL;
+        }
+        
+        // Mostrar resultados cuando el juego termina
+        function showGameResults() {
+            console.log('🏆 Juego terminado, mostrando resultados...');
+            alert('🏁 ¡El juego ha terminado! Gracias por participar.');
+            
+            // Redirigir a página de resultados o admin
+            window.location.href = 'admin.html';
         }
         
         function showError(message) {

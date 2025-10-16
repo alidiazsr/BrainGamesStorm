@@ -181,6 +181,92 @@ async function joinFirebaseGame(gameCode, playerName, avatar) {
     }
 }
 
+// Función para obtener datos del juego en tiempo real
+async function getGameData(gameCode) {
+    if (!isFirebaseReady) {
+        await initFirebase();
+    }
+    
+    try {
+        const gameDoc = await db.collection('games').doc(gameCode).get();
+        if (gameDoc.exists) {
+            return gameDoc.data();
+        } else {
+            throw new Error('Juego no encontrado');
+        }
+    } catch (error) {
+        console.error('❌ Error obteniendo datos del juego:', error);
+        throw error;
+    }
+}
+
+// Función para escuchar cambios del juego en tiempo real
+function listenToGameChanges(gameCode, callback) {
+    if (!isFirebaseReady) {
+        console.error('❌ Firebase no está listo para escuchar cambios');
+        return null;
+    }
+    
+    console.log('👂 Iniciando escucha en tiempo real para:', gameCode);
+    
+    const unsubscribe = db.collection('games').doc(gameCode).onSnapshot((doc) => {
+        if (doc.exists) {
+            const gameData = doc.data();
+            console.log('🔄 Cambios detectados en el juego:', gameData);
+            callback(gameData);
+        } else {
+            console.log('⚠️ El juego ya no existe');
+            callback(null);
+        }
+    }, (error) => {
+        console.error('❌ Error en escucha en tiempo real:', error);
+    });
+    
+    return unsubscribe;
+}
+
+// Función para actualizar estado del juego
+async function updateGameStatus(gameCode, updates) {
+    if (!isFirebaseReady) {
+        await initFirebase();
+    }
+    
+    try {
+        console.log('📝 Actualizando juego:', gameCode, updates);
+        await db.collection('games').doc(gameCode).update(updates);
+        console.log('✅ Juego actualizado correctamente');
+        return true;
+    } catch (error) {
+        console.error('❌ Error actualizando juego:', error);
+        throw error;
+    }
+}
+
+// Función para iniciar el juego (profesor)
+async function startGameInFirebase(gameCode) {
+    return await updateGameStatus(gameCode, {
+        status: 'playing',
+        currentQuestion: 0,
+        startedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
+// Función para pasar a la siguiente pregunta
+async function nextQuestionInFirebase(gameCode, questionIndex) {
+    return await updateGameStatus(gameCode, {
+        currentQuestion: questionIndex,
+        questionStartTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
+// Función para terminar el juego
+async function endGameInFirebase(gameCode) {
+    return await updateGameStatus(gameCode, {
+        status: 'finished',
+        endedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
 // Función de diagnóstico simple
 function diagnosticFirebase() {
     console.log('🔍 Diagnóstico Firebase Simple:');
@@ -208,6 +294,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.initFirebase = initFirebase;
 window.createGameInFirebase = createGameInFirebase;
 window.joinFirebaseGame = joinFirebaseGame;
+window.getGameData = getGameData;
+window.listenToGameChanges = listenToGameChanges;
+window.updateGameStatus = updateGameStatus;
+window.startGameInFirebase = startGameInFirebase;
+window.nextQuestionInFirebase = nextQuestionInFirebase;
+window.endGameInFirebase = endGameInFirebase;
 window.diagnosticFirebase = diagnosticFirebase;
 window.isFirebaseReady = () => isFirebaseReady;
 
