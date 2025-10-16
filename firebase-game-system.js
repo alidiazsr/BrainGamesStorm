@@ -594,6 +594,32 @@ function attemptFirebaseInitialization() {
     }
 }
 
+// Función para forzar inicialización manual
+function forceFirebaseInitialization() {
+    console.log('🔧 Forzando inicialización Firebase manual...');
+    
+    // Limpiar estado previo
+    isFirebaseInitialized = false;
+    window.firebaseConfigured = false;
+    db = null;
+    
+    // Si Firebase no está disponible, cargar scripts primero
+    if (typeof firebase === 'undefined' && typeof window.firebase === 'undefined') {
+        console.log('📦 Cargando Firebase SDK...');
+        loadFirebaseScripts();
+        
+        // Esperar y reintentar
+        setTimeout(() => {
+            console.log('🔄 Reintentando después de cargar SDK...');
+            forceFirebaseInitialization();
+        }, 2000);
+        return false;
+    }
+    
+    // Intentar inicializar
+    return attemptFirebaseInitialization();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📱 DOM cargado, iniciando sistema Firebase...');
     
@@ -627,6 +653,7 @@ if (document.readyState !== 'loading') {
 
 // Exponer funciones inmediatamente (no esperar a inicialización)
 window.initializeFirebase = initializeFirebase;
+window.forceFirebaseInitialization = forceFirebaseInitialization;
 window.startQuizWithFirebase = startQuizWithFirebase;
 window.validateFirebaseConfig = validateFirebaseConfig;
 window.createFirebaseGame = createFirebaseGame;

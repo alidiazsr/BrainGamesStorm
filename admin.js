@@ -9,6 +9,23 @@ let questionCount = 0;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Admin panel cargando...');
     
+    // FORZAR inicialización Firebase inmediatamente
+    setTimeout(() => {
+        console.log('🔥 Forzando inicialización Firebase desde admin...');
+        if (typeof window.forceFirebaseInitialization === 'function') {
+            window.forceFirebaseInitialization();
+        } else if (typeof window.initializeFirebase === 'function') {
+            window.initializeFirebase();
+        } else {
+            console.log('⚠️ Funciones Firebase no disponibles, reintentando...');
+            setTimeout(() => {
+                if (typeof window.forceFirebaseInitialization === 'function') {
+                    window.forceFirebaseInitialization();
+                }
+            }, 2000);
+        }
+    }, 500);
+    
     // Debug del sistema
     setTimeout(() => {
         debugSystemStatus();
@@ -370,14 +387,28 @@ function startQuiz(quizId) {
         console.log('- typeof window.firebase:', typeof window.firebase);
     }
     
-    // Intentar inicializar Firebase si no está configurado
-    if (!window.firebaseConfigured && typeof window.initializeFirebase === 'function') {
-        console.log('🔄 Intentando inicializar Firebase...');
-        const initialized = window.initializeFirebase();
-        if (initialized) {
-            console.log('✅ Firebase inicializado exitosamente');
+    // Intentar forzar inicialización Firebase si no está configurado
+    if (!window.firebaseConfigured) {
+        console.log('🔄 Firebase no configurado, forzando inicialización...');
+        
+        if (typeof window.forceFirebaseInitialization === 'function') {
+            console.log('� Usando inicialización forzada...');
+            const initialized = window.forceFirebaseInitialization();
+            if (initialized) {
+                console.log('✅ Firebase inicializado exitosamente con forzado');
+            } else {
+                console.log('⏳ Firebase SDK cargando, esperando...');
+            }
+        } else if (typeof window.initializeFirebase === 'function') {
+            console.log('🔄 Usando inicialización normal...');
+            const initialized = window.initializeFirebase();
+            if (initialized) {
+                console.log('✅ Firebase inicializado exitosamente');
+            } else {
+                console.log('⏳ Firebase aún no disponible');
+            }
         } else {
-            console.log('⏳ Firebase aún no disponible');
+            console.log('❌ Funciones de Firebase no disponibles');
         }
     }
     
