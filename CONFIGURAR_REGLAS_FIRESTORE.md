@@ -12,24 +12,28 @@ Tu proyecto Firebase ahora usa **Firestore** en lugar de Realtime Database. Nece
 
 ### 2. Configurar las Reglas
 
-Reemplaza las reglas actuales con estas **REGLAS DE DESARROLLO**:
+Reemplaza las reglas actuales con estas **REGLAS DE DESARROLLO** (copia exactamente sin los backticks):
 
-```javascript
+```
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permitir lectura y escritura en la colección 'games'
     match /games/{gameId} {
       allow read, write: if true;
     }
     
-    // Permitir cualquier operación en documentos de desarrollo
     match /{document=**} {
       allow read, write: if true;
     }
   }
 }
 ```
+
+**⚠️ IMPORTANTE:** 
+- NO copies los backticks ``` del código
+- Copia solo desde `rules_version` hasta la última `}`
+- Asegúrate de que NO haya espacios extra al inicio
 
 ### 3. Publicar las Reglas
 1. Copia y pega las reglas arriba
@@ -61,6 +65,24 @@ service cloud.firestore {
 ```
 
 ## 🆘 Solución de Problemas
+
+### Error: "Parse error on line 1" 
+- **Causa**: Formato incorrecto o caracteres extra
+- **Solución**: 
+  1. Borra TODAS las reglas existentes
+  2. Copia este texto exacto (sin espacios al inicio):
+
+```
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
 
 ### Error: "permission-denied"
 - **Causa**: Las reglas no están configuradas correctamente

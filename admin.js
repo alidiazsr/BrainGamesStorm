@@ -273,9 +273,6 @@ function debugSystemStatus() {
     console.log('- initializeFirebase:', typeof initializeFirebase);
     console.log('- startQuizWithFirebase:', typeof startQuizWithFirebase);
     
-    console.log('File system:');
-    console.log('- createStaticGameFile:', typeof createStaticGameFile);
-    
     console.log('Admin funciones:');
     console.log('- startQuiz:', typeof startQuiz);
     console.log('- loadQuizList:', typeof loadQuizList);
@@ -316,30 +313,12 @@ function exportQuizDirectly(quizId) {
     }
     
     try {
-        // Formato simple compatible con la versión anterior
-        const quizJson = {
-            name: quiz.title,
-            description: quiz.description || '',
-            timeLimit: quiz.timeLimit || 30,
-            questions: quiz.questions.map(q => ({
-                question: q.text,
-                options: q.options,
-                answer: q.correctAnswer,
-                justification: q.justification || ''
-            }))
-        };
-        
-        // Generar nombre de archivo
-        const fileName = generateFileName(quiz.title);
-        
-        // Descargar archivo JSON
-        downloadJsonFile(quizJson, fileName);
-        
-        alert('Cuestionario exportado exitosamente como JSON');
+        // Mostrar mensaje de que la función fue eliminada por seguridad
+        alert('⚠️ Función de exportación eliminada por seguridad\n\nEsta función podría exponer las respuestas correctas a los estudiantes.\n\nPara crear juegos, usa el botón "Iniciar Quiz" que es seguro.');
         
     } catch (error) {
-        console.error('Error exportando cuestionario:', error);
-        alert('Error al exportar el cuestionario: ' + error.message);
+        console.error('Error en exportQuizDirectly:', error);
+        alert('Error: ' + error.message);
     }
 }
 
@@ -443,31 +422,12 @@ function startQuiz(quizId) {
 }
 
 function useFileSystemWithWarning(quizId, quiz) {
-    console.log('⚠️ Mostrando advertencia de sistema limitado');
+    console.log('⚠️ Sistema de archivos deshabilitado por seguridad');
     
-    // Confirmar con advertencia
-    if (!confirm('⚠️ ADVERTENCIA: Sistema Firebase no disponible\n\n' + 
-                 'El cuestionario "' + quiz.title + '" se iniciará con el sistema de archivos.\n\n' +
-                 '❌ LIMITACIÓN: Solo funcionará en la misma red\n' +
-                 '✅ Para que funcione desde cualquier dispositivo, necesitas Firebase configurado\n\n' +
-                 '¿Continuar con el sistema limitado?')) {
-        return;
-    }
-    
-    try {
-        console.log('📁 Iniciando con sistema de archivos...');
-        // Verificar si la función existe
-        if (typeof createStaticGameFile === 'function') {
-            createStaticGameFile(quizId);
-        } else {
-            console.error('❌ createStaticGameFile no está disponible');
-            alert('Error: Sistema de archivos no disponible. Recarga la página.');
-        }
-        
-    } catch (error) {
-        console.error('❌ Error al iniciar quiz:', error);
-        alert('Error al iniciar el cuestionario: ' + error.message);
-    }
+    alert('⚠️ Sistema de archivos deshabilitado por seguridad\n\n' + 
+          'El sistema de archivos estáticos fue eliminado porque podía exponer respuestas.\n\n' +
+          '✅ Usa Firebase para un sistema seguro y funcional desde cualquier dispositivo.\n\n' +
+          'Configura las reglas de Firebase y usa "Iniciar Quiz con Firebase".');
 }
 
 function showAdvancedOptions(quizId) {
@@ -690,20 +650,6 @@ function generateFileName(title) {
     return cleanTitle + '_' + timestamp + '.json';
 }
 
-function downloadJsonFile(data, filename) {
-    const jsonStr = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
 // ====== NAVEGACIÓN ======
 
 function clearAllQuizzes() {
@@ -730,49 +676,11 @@ function exportQuizAsJson() {
     }
     
     try {
-        // Recopilar datos actuales del formulario
-        const title = document.getElementById('quizTitle').value.trim();
-        const description = document.getElementById('quizDescription').value.trim();
-        const timeLimit = parseInt(document.getElementById('timeLimit').value);
-        
-        // Recopilar preguntas
-        const questions = [];
-        const questionElements = document.querySelectorAll('.question-item');
-        
-        questionElements.forEach((questionEl, index) => {
-            const questionText = questionEl.querySelector('.question-text').value.trim();
-            const options = Array.from(questionEl.querySelectorAll('.answer-option input[type="text"]'))
-                .map(input => input.value.trim());
-            const correctAnswerRadio = questionEl.querySelector('input[name="correct_' + questionEl.dataset.questionId + '"]:checked');
-            
-            if (questionText && correctAnswerRadio) {
-                questions.push({
-                    question: questionText,
-                    options: options,
-                    answer: parseInt(correctAnswerRadio.value),
-                    justification: ''
-                });
-            }
-        });
-        
-        // Crear objeto JSON simple
-        const quizJson = {
-            name: title,
-            description: description,
-            timeLimit: timeLimit,
-            questions: questions
-        };
-        
-        // Generar nombre de archivo
-        const fileName = generateFileName(title);
-        
-        // Descargar archivo JSON
-        downloadJsonFile(quizJson, fileName);
-        
-        alert('Cuestionario exportado exitosamente como JSON');
+        // Mostrar mensaje de que la función fue eliminada por seguridad
+        alert('⚠️ Función de exportación eliminada por seguridad\n\nEsta función podría exponer las respuestas correctas a los estudiantes.\n\nPara crear juegos, usa el botón "Iniciar Quiz" que es seguro.');
         
     } catch (error) {
-        console.error('Error exportando cuestionario:', error);
-        alert('Error al exportar el cuestionario: ' + error.message);
+        console.error('Error en exportQuizAsJson:', error);
+        alert('Error: ' + error.message);
     }
 }
