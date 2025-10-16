@@ -414,27 +414,33 @@ async function startQuiz(quizId) {
     }
 }
 
-        console.log('- typeof window.firebase:', typeof window.firebase);
+// Función para mostrar código de juego
+function showGameCode(gameCode, quiz) {
+    console.log('📺 Mostrando código de juego:', gameCode);
+    
+    // Actualizar el código en el modal si existe
+    const gameCodeDisplay = document.getElementById('gameCodeDisplay');
+    if (gameCodeDisplay) {
+        gameCodeDisplay.textContent = gameCode;
     }
     
-    // Intentar forzar inicialización Firebase si no está configurado
-    if (!window.firebaseConfigured) {
-        console.log('🔄 Firebase no configurado, forzando inicialización...');
-        
-        if (typeof window.forceFirebaseInitialization === 'function') {
-            console.log('� Usando inicialización forzada...');
-            const initialized = window.forceFirebaseInitialization();
-            if (initialized) {
-                console.log('✅ Firebase inicializado exitosamente con forzado');
-            } else {
-                console.log('⏳ Firebase SDK cargando, esperando...');
-            }
-        } else if (typeof window.initializeFirebase === 'function') {
-            console.log('🔄 Usando inicialización normal...');
-            const initialized = window.initializeFirebase();
-            if (initialized) {
-                console.log('✅ Firebase inicializado exitosamente');
-            } else {
+    // Mostrar modal de código si existe
+    const startModal = document.getElementById('startModal');
+    if (startModal) {
+        startModal.style.display = 'flex';
+    }
+    
+    // Copiar al portapapeles
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(gameCode).then(() => {
+            console.log('📋 Código copiado al portapapeles:', gameCode);
+        }).catch(err => {
+            console.log('⚠️ No se pudo copiar al portapapeles:', err);
+        });
+    }
+    
+    console.log(`🎮 Juego listo: ${quiz.title} - Código: ${gameCode}`);
+}
                 console.log('⏳ Firebase aún no disponible');
             }
         } else {
