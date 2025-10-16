@@ -19,7 +19,7 @@ window.firebaseConfigured = false;
 
 // ====== INICIALIZACIÓN DE FIREBASE ======
 
-function initializeFirebase() {
+async function initializeFirebase() {
     try {
         console.log('🔥 Iniciando inicialización Firebase con Firestore...');
         console.log('- typeof firebase:', typeof firebase);
@@ -28,8 +28,13 @@ function initializeFirebase() {
         // Verificar si Firebase ya está cargado
         if (typeof firebase === 'undefined' && typeof window.firebase === 'undefined') {
             console.log('🔄 Firebase SDK no disponible, cargando scripts...');
-            loadFirebaseScripts();
-            return false;
+            try {
+                await loadFirebaseScripts();
+                console.log('✅ Scripts Firebase cargados exitosamente');
+            } catch (error) {
+                console.error('❌ Error cargando scripts Firebase:', error);
+                return false;
+            }
         }
 
         // Usar firebase global o window.firebase
@@ -68,41 +73,84 @@ function initializeFirebase() {
 function loadFirebaseScripts() {
     console.log('📦 Cargando Firebase SDK con Firestore...');
     
-    // Verificar si ya hay scripts Firebase cargándose
-    if (document.querySelector('script[src*="firebase"]')) {
-        console.log('📦 Scripts Firebase ya en proceso de carga');
-        return;
-    }
-    
-    // Cargar Firebase SDK con Firestore
-    const scripts = [
-        'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
-        'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
-    ];
-    
-    let loaded = 0;
-    const totalScripts = scripts.length;
-    
-    scripts.forEach((src, index) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = () => {
-            loaded++;
-            console.log(`📦 Script ${index + 1}/${totalScripts} cargado: ${src.split('/').pop()}`);
+    return new Promise((resolve, reject) => {
+        // Verificar si Firebase ya está cargado
+        if (typeof firebase !== 'undefined') {
+            console.log('✅ Firebase ya está disponible');
+            resolve();
+            return;
+        }
+        
+        // Verificar si ya hay scripts Firebase cargándose
+        const existingScript = document.querySelector('script[src*="firebase"]');
+        if (existingScript) {
+            console.log('📦 Scripts Firebase ya en proceso de carga, esperando...');
+            // Esperar a que se cargue
+            const checkFirebase = setInterval(() => {
+                if (typeof firebase !== 'undefined') {
+                    clearInterval(checkFirebase);
+                    console.log('✅ Firebase cargado exitosamente');
+                    resolve();
+                }
+            }, 500);
             
-            if (loaded === totalScripts) {
-                console.log('✅ Todos los scripts Firebase cargados');
-                // Intentar inicializar después de cargar todos los scripts
-                setTimeout(() => {
-                    console.log('🔄 Reintentando inicialización después de cargar scripts...');
-                    attemptFirebaseInitialization();
-                }, 500);
-            }
-        };
-        script.onerror = (error) => {
-            console.error('❌ Error cargando Firebase SDK:', src, error);
-        };
-        document.head.appendChild(script);
+            // Timeout después de 15 segundos
+            setTimeout(() => {
+                clearInterval(checkFirebase);
+                reject(new Error('Timeout esperando Firebase'));
+            }, 15000);
+            return;
+        }
+        
+        // Cargar Firebase SDK con Firestore
+        console.log('📦 Iniciando carga de scripts Firebase...');
+        const scripts = [
+            'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+            'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
+        ];
+        
+        let loaded = 0;
+        const totalScripts = scripts.length;
+        
+        scripts.forEach((src, index) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => {
+                loaded++;
+                console.log(`📦 Script ${index + 1}/${totalScripts} cargado: ${src.split('/').pop()}`);
+                
+                if (loaded === totalScripts) {
+                    console.log('✅ Todos los scripts Firebase cargados');
+                    // Esperar a que Firebase esté disponible
+                    setTimeout(() => {
+                        if (typeof firebase !== 'undefined') {
+                            console.log('✅ Firebase disponible después de carga');
+                            resolve();
+                        } else {
+                            console.log('⚠️ Firebase aún no disponible, esperando...');
+                            const checkFirebase = setInterval(() => {
+                                if (typeof firebase !== 'undefined') {
+                                    clearInterval(checkFirebase);
+                                    console.log('✅ Firebase finalmente disponible');
+                                    resolve();
+                                }
+                            }, 200);
+                            
+                            // Timeout después de 10 segundos
+                            setTimeout(() => {
+                                clearInterval(checkFirebase);
+                                reject(new Error('Firebase no se cargó correctamente'));
+                            }, 10000);
+                        }
+                    }, 1000);
+                }
+            };
+            script.onerror = (error) => {
+                console.error('❌ Error cargando Firebase SDK:', src, error);
+                reject(error);
+            };
+            document.head.appendChild(script);
+        });
     });
 }
 
@@ -581,21 +629,26 @@ function showToast(message) {
 // ====== AUTO-INICIALIZACIÓN MEJORADA ======
 
 // Función para intentar inicialización múltiples veces
-function attemptFirebaseInitialization() {
+async function attemptFirebaseInitialization() {
     console.log('🔄 Intentando inicializar Firebase...');
     
-    const success = initializeFirebase();
-    if (success) {
-        console.log('✅ Firebase inicializado exitosamente');
-        return true;
-    } else {
-        console.log('⏳ Firebase SDK aún no disponible, reintentando...');
+    try {
+        const success = await initializeFirebase();
+        if (success !== false) {
+            console.log('✅ Firebase inicializado exitosamente');
+            return true;
+        } else {
+            console.log('⏳ Firebase SDK aún no disponible, reintentando...');
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error en inicialización Firebase:', error);
         return false;
     }
 }
 
 // Función para forzar inicialización manual
-function forceFirebaseInitialization() {
+async function forceFirebaseInitialization() {
     console.log('🔧 Forzando inicialización Firebase manual...');
     
     // Limpiar estado previo
@@ -603,21 +656,14 @@ function forceFirebaseInitialization() {
     window.firebaseConfigured = false;
     db = null;
     
-    // Si Firebase no está disponible, cargar scripts primero
-    if (typeof firebase === 'undefined' && typeof window.firebase === 'undefined') {
-        console.log('📦 Cargando Firebase SDK...');
-        loadFirebaseScripts();
-        
-        // Esperar y reintentar
-        setTimeout(() => {
-            console.log('🔄 Reintentando después de cargar SDK...');
-            forceFirebaseInitialization();
-        }, 2000);
+    try {
+        // Intentar inicializar directamente
+        const success = await attemptFirebaseInitialization();
+        return success;
+    } catch (error) {
+        console.error('❌ Error en forzar inicialización:', error);
         return false;
     }
-    
-    // Intentar inicializar
-    return attemptFirebaseInitialization();
 }
 
 document.addEventListener('DOMContentLoaded', function() {

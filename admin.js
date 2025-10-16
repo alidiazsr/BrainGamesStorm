@@ -356,7 +356,7 @@ function deleteQuizConfirm(quizId) {
     }
 }
 
-function startQuiz(quizId) {
+async function startQuiz(quizId) {
     console.log('🔍 startQuiz llamada con quizId:', quizId);
     
     // Verificar que las funciones de script.js estén disponibles
@@ -374,16 +374,46 @@ function startQuiz(quizId) {
     }
     
     console.log('✅ Quiz encontrado:', quiz.title);
-    console.log('🔍 Verificando estado Firebase...');
     
-    // Verificar estado completo de Firebase
-    if (typeof window.checkFirebaseStatus === 'function') {
-        const status = window.checkFirebaseStatus();
-        console.log('📊 Estado detallado Firebase:', status);
-    } else {
-        console.log('- window.firebaseConfigured:', window.firebaseConfigured);
-        console.log('- typeof startQuizWithFirebase:', typeof startQuizWithFirebase);
-        console.log('- typeof firebase:', typeof firebase);
+    try {
+        // Usar el nuevo sistema Firebase simple
+        console.log('� Iniciando con Firebase Simple...');
+        
+        // Asegurar que Firebase esté inicializado
+        if (typeof window.initFirebase === 'function') {
+            const firebaseReady = await window.initFirebase();
+            if (!firebaseReady) {
+                throw new Error('No se pudo inicializar Firebase');
+            }
+        }
+        
+        // Crear juego en Firebase
+        if (typeof window.createGameInFirebase === 'function') {
+            const gameCode = await window.createGameInFirebase(quizId);
+            
+            // Mostrar código de juego
+            showGameCode(gameCode, quiz);
+            
+            // Mostrar mensaje de éxito
+            alert(`✅ Juego creado en Firestore\n\nCódigo: ${gameCode}\n\nLos estudiantes pueden unirse desde cualquier dispositivo usando este código.`);
+            
+        } else {
+            throw new Error('createGameInFirebase no está disponible');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error creando juego Firebase:', error);
+        
+        // Fallback al sistema de archivos
+        console.log('⚠️ Usando sistema de archivos como respaldo');
+        alert('⚠️ Problema con Firebase. El juego funcionará solo en este dispositivo.\n\nPara jugar desde múltiples dispositivos, verifica tu conexión a internet.');
+        
+        // Mostrar código local
+        const localCode = 'LOCAL-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        showGameCode(localCode, quiz);
+    }
+}
+
         console.log('- typeof window.firebase:', typeof window.firebase);
     }
     
